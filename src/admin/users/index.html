@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Admin</title>
+        <link rel="shortcut icon" href="../../../img/favicon.png" >
+        <link rel="stylesheet" href="../../../css/bootstrap.min.css">
+        <link rel="stylesheet" href="../../../css/mdb.min.css">
+        <link rel="stylesheet" href="../../../css/normalize.css">
+        <link rel="stylesheet" href="../../../css/lightbox.css">
+        <link rel="stylesheet" href="../../../css/styleAdmin.css">
+        <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+        <script src="../../../js/jquery-3.3.1.min.js" charset="utf-8"></script>
+        <script src="../../../js/popper.min.js" charset="utf-8"></script>
+        <script src="../../../js/mdb.min.js" charset="utf-8"></script>
+        <script src="../../../js/bootstrap.min.js" charset="utf-8"></script>
+        <script src="../../../js/fontawesome-all.js" charset="utf-8"></script>
+        <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+        <script src="../../adoptions/app.js"></script>
+        <script src="../../adoptions/init.js"></script>
+        <script src="../../adoptions/FormSerialize.js"></script>
+        <script src="../../../js/intern/data.js"></script>
+        <script>
+            $(document).ready(function(){
+                authentication("../../session")
+            })
+        </script>
+    </head>
+    <body>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-storage.js"> </script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-database.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-firestore.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-messaging.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-functions.js"></script>
+        <script src="../../../js/main.js"></script>
+
+        <script>
+            firebase.initializeApp(getInit());
+            $(document).ready(function(){
+                readUserData()
+                $("#render").on("click", ".delete-btn", function(){
+                    var key = $(this).data("id")
+                    firebase.database().ref('/users/'+key).remove().then(function(){
+                        readUserData()
+                    })
+                })
+
+                $("#add").click(function(){
+                    $("#modalAddUser").modal("show")
+                });
+
+                $("#acceptAddUser").click(function(){
+                    var email = $("#email").val()
+                    var pass = $("#password").val()
+                    var rol = $("#rol").val()
+                    createrAccount(email, pass, rol);
+                });
+
+            })
+
+            function createrAccount(email, password, rol){
+                $("#modalLoading").modal("show");
+                firebase.auth().createUserWithEmailAndPassword(email, password).then(function(res){
+                    firebase.database().ref("users/").push({
+                            email: email,
+                            rol: rol,
+                            id: res.user.uid
+                    }).then((res) => {
+                        $("#modalLoading").modal("hide");
+                        $("#modalAddUser").modal("hide")
+                        readUserData()
+                    });
+                }).catch(function(error) {
+                // Handle Errors here.
+                    var errorCode = error.code;
+                    var errorMessage = error.message;
+                    console.log(error);
+                    $("#modalAddUser").modal("hide")
+                    alert("Ha ocurrido un error inesperado intente más tarde");
+                });
+            }
+
+            function readUserData() {
+                var cad = "";
+                firebase.database().ref('/users/').once('value').then(async function(snapshot) {
+                    for(var key in snapshot.val()){
+                        var item = snapshot.val()[key];
+                        cad+= '<tr>'+
+                            '<td>'+
+                                item.email+
+                            '</td>'+
+                            '<td>'+
+                                item.rol+
+                            '</td>'+
+                            '<td>'+
+                                '<a class="btn btn-danger btn-sm delete-btn" data-ui="'+item.id+'" data-id="'+key+'"><i class="fas fa-trash-alt"></i></a>'+
+                            '</td>'+
+                            '</tr>'
+                    }
+                    $("#render").html(cad);
+                });
+            }
+
+        </script>
+
+        <div class="wrapper d-flex align-items-stretch">
+            <nav id="sidebar">
+                <div class="p-4 pt-5">
+                <a href="#" class="img logo rounded-circle mb-5" style="background-image: url(images/logo.jpg);"></a>
+                <ul class="list-unstyled components mb-5">
+                    <div class="list-group" id="list-tab" role="tablist">
+                        <li>
+                            <a href="../">Caminatas caninas</a>
+                        </li>
+                        <li>
+                            <a href="../adoption/">Adopciones</a>
+                        </li>
+                        <li>
+                            <a href="../news">Noticias y avisos</a>
+                        </li>
+                        <li class="active">
+                            <a href="#">Usuarios</a>
+                        </li>
+                        <li>
+                            <a href="../info">Información contacto</a>
+                        </li>
+                        <li>
+                            <a href="../about">Acerca de nosotros</a>
+                        </li>
+                        <li>
+                            <a href="../ayudog">Ayudog</a>
+                        </li>
+                        <li>
+                            <a href="../../adoptions/adoption.html">Admin visual</a>
+                        </li>
+                    </div>
+                </ul>
+
+            <div class="footer">
+                
+            </div>
+
+        </div>
+            </nav>
+
+            <!-- Page Content  -->
+            <div id="content" class="p-4 p-md-5">
+                <a href="#" id="add" class="float">
+                    <i class="fa fa-plus my-float"></i>
+                </a>
+                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                    <div class="container-fluid">
+
+                        <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                            <i class="fa fa-bars"></i>
+                            <span class="sr-only">Toggle Menu</span>
+                        </button>
+                        <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                            <i class="fa fa-bars"></i>
+                        </button>
+
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                            <ul class="nav navbar-nav ml-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="../">Caminatas caninas</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="../adoption">Adopciones</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="../news">Noticias y avisos</a>
+                                </li>
+                                <li class="nav-item active">
+                                    <a class="nav-link" href="../users">Usuarios</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="../info">Información contacto</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="../about">Acerca de nosotros</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="../ayudog">Ayudog</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+                <style>
+                    .table100-head {
+                        font-family: OpenSans-Regular;
+                        font-size: 18px;
+                        color: #fff;
+                        line-height: 1.2;
+                        font-weight: unset;
+                    }
+                    .float{
+                        position:fixed;
+                        width:55px;
+                        height:55px;
+                        bottom:40px;
+                        right:5px;
+                        background-color:#FF3547;
+                        color:#FFF;
+                        border-radius:50px;
+                        text-align:center;
+                        box-shadow: 2px 2px 3px #999;
+                    }
+
+                    .my-float{
+                        margin-top:22px;
+                    }
+                </style>
+
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="list-caminatas" role="tabpanel" aria-labelledby="list-caminatas-list">
+                        <div id="caminatas">
+                            <h2 class="mb-4">Usuarios</h2>
+                            <div class="container-fluid inner">
+                                <table class="table table-bordered ">
+                                    <thead class="table100-head" style="background: #36304A;">
+                                        <tr class="tableizer-firstrow">
+                                            <th>Correo</th>
+                                            <th>Rol</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="render"></tbody>
+                                    
+                                </table>
+                            
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalAddUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Agregar Usuario</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                <div class="modal-body">
+                    <div class="col-12">
+                        <div class="row p-3">
+                            <div class="col-12">
+                                <label for="basic-url">Correo</label>
+                                <div class="input-group mb-3">
+                                    <input type="email" class="form-control" id="email">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label for="basic-url">Contraseña</label>
+                                <div class="input-group mb-3">
+                                    <input type="password" class="form-control" id="password">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                              <label for="basic-url">Roles</label>
+                              <div class="input-group mb-3">
+                                <select class="form-control" name="rol" id="rol">
+                                  <option value="0" selected>Selecciona un rol</option>
+                                  <option value="1">Caminatas Caninas</option>
+                                  <option value="2">Adopción</option>
+                                  <option value="3">Experiencias vividas</option>
+                                  <option value="4">Noticias y Avisos</option>
+                                  <option value="5">Admin</option>
+                                </select>
+                              </div>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-12">
+                        <button id="acceptAddUser" type="button" class="btn btn-primary btn-block">Registrar</button>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+    </body>
+</html>

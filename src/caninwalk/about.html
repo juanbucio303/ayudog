@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Adopción</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <link rel="shortcut icon" href="../../img/favicon.png" >
+        <link rel="stylesheet" href="../../css/bootstrap.min.css">
+        <link rel="stylesheet" href="../../css/mdb.min.css">
+        <link rel="stylesheet" href="../../css/normalize.css">
+        <link rel="stylesheet" href="../../css/style.css">
+        <link rel="stylesheet" href="../../css/lightbox.css">
+        <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+        <script src="../../js/jquery-3.3.1.min.js" charset="utf-8"></script>
+        <script src="../../js/popper.min.js" charset="utf-8"></script>
+        <script src="../../js/mdb.min.js" charset="utf-8"></script>
+        <script src="../../js/bootstrap.min.js" charset="utf-8"></script>
+        <script src="../../js/lightbox.js" charset="utf-8"></script>
+        <script src="../../js/smooth-scroll.min.js"></script>
+        <script src="../../js/fontawesome-all.js" charset="utf-8"></script>
+        <script src="../../js/parallax.js" charset="utf-8"></script>
+        <script src="../../js/scrollreveal.js"></script>
+        <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+        <script src="../adoptions/app.js"></script>
+        <script src="../adoptions/init.js"></script>
+</head>
+
+<body >
+	<!-- Firebase App is always required and must be first -->
+	<script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-storage.js"> </script>
+	<script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-auth.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-database.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-firestore.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-messaging.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-functions.js"></script>
+    
+  <script>
+            
+    $(document).ready(function(){
+
+      $(".seeMore").hide()
+      $(".btn-see-less").hide()
+
+        $(".ing").hide();
+
+        $('.botonF1').click(function(){
+          $('.btn').addClass('animacionVer');
+        })
+        $('.contenedor').mouseleave(function(){
+          $('.btn').removeClass('animacionVer');
+        })
+        var id = 0
+        $(".btn-see").click(function(){
+          id = $(".text-news").data("id");
+          $(".btn-see").hide();
+          $(".btn-see-less").show();
+          $(".seeMore").show();
+        })
+        $(".btn-see-less").click(function(){
+          $(".btn-see-less").hide();
+          $(".btn-see").show();
+          $(".seeMore").hide();
+        })
+
+        $(".toAdopt").click(function(){
+          window.location.href = "#adoption"
+        })
+
+        $(".mailpetadop").click(function(){
+          window.open("https://mail.google.com/mail/?compose=1&view=cm&fs=1&to=info@ayudog.com&su=subject&body=hola buen dia",'_blank');
+        })
+
+        $(".mailtoInfo").click(function(){
+          window.open("https://mail.google.com/mail/?compose=1&view=cm&fs=1&to=info@ayudog.com&su=subject&body=hola buen dia",'_blank');
+        })
+
+        $("#btn-show-adoption").click(function(){
+          $(".adopt-hiden").removeClass("d-none");
+          $("#btn-show-adoption").addClass("d-none");
+          $("#btn-hide-adoption").removeClass("d-none");
+        })
+
+        $("#btn-hide-adoption").click(function(){
+          $(".adopt-hiden").addClass("d-none");
+          $("#btn-hide-adoption").addClass("d-none");
+          $("#btn-show-adoption").removeClass("d-none");
+        })
+    })
+
+</script>
+	<!-- Inicializa o firebase -->
+	<script>
+        firebase.initializeApp(getInit());
+
+        $(document).ready(function(){
+           
+          readAboutData()
+        });
+        function readAboutData() {
+            var cad = "";
+            firebase.database().ref('/about/').once('value').then(async function(snapshot) {
+                for(var key in snapshot.val()){
+                    var item = snapshot.val()[key];
+                    var image;
+                    var ref = firebase.storage().ref("about/");
+                    var tangRef = ref.child(item.fileName);
+                    image = await tangRef.getDownloadURL();
+                    cad+= '<div class="col-12" style="margin-top:20px;"><div class="row"><div class="col-xs-12 col-sm-12 col-md-4" style="margin: auto;"><img src="'+image+'" style="border-radius: 7%;" class="card-img-top col-12" alt="narrower"></div>'+
+                    '<div class="col-md-8 col-sm-12 col-xs-12 text-white">'+
+                    
+                      '<div class="col-12 text-center" style="margin-top: 5px; color: white; font-size: 45px; font-weight: bold;">'+
+                        'Sobre nosotros'+
+                          '<hr style="background: #FF5757; height: 5px;">'+
+                        '</div>'+
+                      '<p style="text-align: justify;"><strong>'+item.descripcionAbout+'</strong></p>'+'</div></div></div>'
+                }
+               
+                $("#render").html(cad);
+            });
+        }
+        
+    
+    </script>
+
+
+    <script>
+      
+
+    </script>
+
+    <style>
+    .contenedor{
+        width:90px;
+        height:240px;
+        position:fixed;
+        right:0px;
+        bottom:0px;
+        z-index: 999;
+        cursor: pointer;
+    }
+    .botonF1{
+        width:60px;
+        height:60px;
+        border-radius:100%;
+        right:0;
+        bottom:0;
+        position:absolute;
+        margin:16px;
+        border:none;
+        outline:none;
+        color:#FFF;
+        background: #00bb2d;
+        font-size:36px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+        transition:.3s;
+        cursor: pointer;
+    }
+
+
+    .imgCard{
+        margin-top: 0;
+        margin-right: 0;
+    }
+    
+
+
+    .container2 {
+      position: relative;
+      width: 50%;
+    }
+
+    .image2 {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0%;
+      right: 100%;
+      background-color: #008CBA;
+      overflow: hidden;
+      width: 0;
+      height: 92%;
+      transition: .5s ease;
+    }
+
+    .container2:hover .overlay {
+      width: 50%;
+      left: 0;
+    }
+
+    .text2 {
+      color: white;
+      font-size: 20px;
+      position: absolute;
+      top: 20%;
+      left: 68%;
+      -webkit-transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
+    }
+    .flip-corner{
+      height: 50px;
+      position: relative;
+      top: 86%;
+      left: 46%;
+      border-radius: 10%;
+    }
+    .cardBox:hover .flip-corner {
+      display: none;
+    }
+    </style>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-hue fixed-top">
+      <div class="container">
+        <a class="navbar-brand px-lg-4 mr-0 d-lg-none" href="http://localhost/ayudog/Ayudog/src/caninwalk/index.html#home">
+          <img src="../../img/caminata_white.png" style="height: 100px;" alt="">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#basicExampleNav" aria-controls="basicExampleNav"
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-center font-weight-bold" id="basicExampleNav">
+          <ul class="navbar-nav">
+            
+          </ul>
+          <a class="navbar-brand px-lg-4 mr-0 d-none d-lg-block" data-scroll href="index.html#home">
+          <img src="../../img/caminata_white.png" style="height: 100px;" alt="">
+          </a>
+          <ul class="navbar-nav">
+            <li class="nav-item font3">
+              <div class="d-none d-lg-block">
+                <a class="nav-link" class="btn"  href="index.html#walk">
+                <div class="esp">
+                  Caminatas Caninas
+                </div>
+                <div class="ing">
+                  Dog Walks
+                </div>
+              </a>
+              </div>
+              <div class="d-block d-md-block d-lg-none">
+                <a class="nav-link" class="btn" data-toggle="modal" href="index.html#walk">
+                <div class="esp">
+                  Caminatas Caninas
+                </div>
+                <div class="ing">
+                  Dog Walks
+                </div>
+                </a>
+              </div>
+            </li>
+            <li class="nav-item font3">
+              <a class="nav-link" data-scroll href="index.html#adoption">
+                <div class="esp">
+                  Adopciones
+                </div>
+                <div class="ing">
+                  Adoptions
+                </div>
+              </a>
+            </li>
+            <li class="nav-item font3">
+              <a class="nav-link" data-scroll href="index.html#news">
+                <div class="esp">
+                  Noticias
+                </div>
+                <div class="ing">
+                  News
+                </div>
+              </a>
+            </li>
+          <li class="nav-item font3">
+            <a class="nav-link" data-scroll href="index.html#contact">
+              <div class="esp">
+                Contactanos
+              </div>
+              <div class="ing">
+                <i class="fa fa-envelope" aria-hidden="true"></i> Contact
+              </div>
+            </a>
+          </li>
+          <li class="nav-item font3">
+            <a class="nav-link" data-scroll href="about.html">
+              <div class="esp">
+                Acerca de nosotros
+              </div>
+              <div class="ing">
+                <i class="fa fa-envelope" aria-hidden="true"></i> About
+              </div>
+            </a>
+          </li>
+          </ul>
+        </div>
+  
+            <div  id="acepting" class="" style="cursor:pointer"><img src="../../img/mex.png" class="card-img-top" style="padding-right:5px" alt=""></div>
+            <div  id="aceptesp" class="" style="cursor:pointer"><img src="../../img/usa.png" class="card-img-top" alt=""></div>
+  
+    </nav>
+    
+    <div class="container">
+      <div class="row" style="margin-top: 120px;">
+        <div id="render"></div>
+        <div class="row" style="margin: auto;">
+          <div class="col-12">
+            <div class="row" style="margin-top:20px;">
+              <img src="../../img/favicon.png" style="width: 150px;" alt="">
+              <div class="text-white" style="margin: auto;padding-left: 15px; padding-right: 15px;font-weight: bold;">y</div>
+              <img src="../../img/caminata_white.png" style="width: 150px;" alt="">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+	
+  </body>
+  <footer class="page-footer font-small blue bg-hue" style="margin-top: 20px;" id="contact">
+
+    <div class="footer-copyright text-center py-5">
+
+        <div class="col-md-12 col-12 "list-inline>
+          <div class="row">
+            <div class="col-12">
+              <div class="esp">
+                <h5 class="font text-white">Proyecto desarrollado por:
+                </h5>
+              </div>
+              <div class="ing">
+                <h5 class="font text-white">Project developed by:
+                </h5>
+              </div>
+              <div class=" d-lg-none d-print-block">
+                <img src="img/logo-direc.png" width="40%" alt="">
+              </div>
+              <div class=" d-none d-lg-block d-print-block">
+                <img src="img/logo-direc.png" width="10%" alt="">
+              </div>
+            </div>
+          </div>
+          <a href="https://www.facebook.com/Ayudogmx-998884180275726" target="_blank" class="list-inline-item"><h4 class="font"><i class="fab fa-facebook-square" id="fac"></i> /ayudogmx</h4></a>
+          <a class="list-inline-item"><h2 class="font3">|</h2></a>
+          <a href="https://www.instagram.com/ayudogmx/" target="_blank" class="list-inline-item"><h4 class="font"><i class="fab fa-instagram" id="inst"></i> ayudogmx</h4></a></p>
+          <a class="font text-white" style="font-size:1.5em">info@ayudog.com</a>
+
+        </div>
+
+      </div>
+  </footer>
+</html>

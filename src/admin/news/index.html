@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Admin</title>
+        <link rel="shortcut icon" href="../../../img/favicon.png" >
+        <link rel="stylesheet" href="../../../css/bootstrap.min.css">
+        <link rel="stylesheet" href="../../../css/mdb.min.css">
+        <link rel="stylesheet" href="../../../css/normalize.css">
+        <link rel="stylesheet" href="../../../css/lightbox.css">
+        <link rel="stylesheet" href="../../../css/styleAdmin.css">
+        <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+        <script src="../../../js/jquery-3.3.1.min.js" charset="utf-8"></script>
+        <script src="../../../js/popper.min.js" charset="utf-8"></script>
+        <script src="../../../js/mdb.min.js" charset="utf-8"></script>
+        <script src="../../../js/bootstrap.min.js" charset="utf-8"></script>
+        <script src="../../../js/fontawesome-all.js" charset="utf-8"></script>
+        <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+        <script src="../../adoptions/app.js"></script>
+        <script src="../../adoptions/init.js"></script>
+        <script src="../../adoptions/FormSerialize.js"></script>
+        <script src="../../../js/intern/data.js"></script>
+        <script>
+            $(document).ready(function(){
+                authentication("../../session")
+            })
+        </script>
+    </head>
+    <body>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-storage.js"> </script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-database.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-firestore.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-messaging.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-functions.js"></script>
+        <script src="../../../js/main.js"></script>
+
+        <script>
+            firebase.initializeApp(getInit());
+            $(document).ready(function(){
+                readNewsData()
+
+                $("#add").click(function(){
+                    $("#modalNews").modal("show");
+                });
+
+                $("#acceptNews").click(function(){
+                    var descripcion= $("#descripcionNews").val();
+                    var file = $("#file-input-news")[0];
+                    var isPrincipal = $("#isPrincipal").is(':checked') ? 1 : 0;
+                    writeNews(descripcion, file, isPrincipal);
+                });
+                
+                $("#render").on("click", ".delete-btn",function(){
+                    var key = $(this).data("id");
+                    var imageName = $(this).data("image");
+                    deleteNews(key, imageName);
+                })
+
+                $("#render").on("click", ".update-news-btn",function(){
+                    var key = $(this).data("id");
+                    var imageName = $(this).data("image");
+                    var principal = $(this).data("principal");
+                    var descripcion = $(this).data("descripcion");
+                    var src = $(this).data("src");
+                    $("#file-input-newsE")
+                    
+                    $("#keyNews").val(key)
+                    $("#imageName").val(imageName)
+                    $("#descripcionNewsE").val(descripcion)
+                    $("#srcEditWalk").attr("src", src)
+                    $("#isPrincipalE").prop("checked", principal==1)
+                    $("#modalNewsEdit").modal("show")
+                    //setFileNews(key, imageName);
+                })
+            
+                $("#acceptNewsE").click(function(){
+                    var form = getFormData($("#formNews"))
+                    var file = $("#file-input-newsE")[0]
+                    var isPrincipal = $("#isPrincipalE").is(':checked') ? 1 : 0;
+                    setFileNews(form.key, form.imageName, file, form.descripcion, isPrincipal);
+                })
+            })
+            function deleteNews(key, image){
+                var key = key;
+                var image = image;
+                var ref = firebase.storage().ref("news/");
+                var tangRef = ref.child(image);
+                tangRef.delete().then(function() {
+                    firebase.database().ref('/news/'+key).remove()
+                    readNewsData()
+                }).catch(function(error) {
+                    console.log(error);
+                    alert("Ha ocurrido un error intente más tarde")
+                });
+            }
+            function writeNews(descripcion, image, isPrincipal) {//Ok
+                $("#modalUpload").modal("show")
+                setFileNews(null, null, image, descripcion, isPrincipal);
+            }
+            function readNewsData() {
+                var cad = "";
+                firebase.database().ref('/news/').once('value').then(async function(snapshot) {
+                    for(var key in snapshot.val()){
+                        var item = snapshot.val()[key];
+                        var image;
+                        var ref = firebase.storage().ref("news/");
+                        var tangRef = ref.child(item.fileName);
+                        image = await tangRef.getDownloadURL();
+                        cad+='<tr>'+
+                            '<td>'+
+                                '<img src="'+image+'" style="border-radius: 7%; height:100px;width:auto;" class="card-img-top col-12" alt="narrower">'+
+                            '</td>'+
+                            '<td>'+
+                                item.descripcionNews+
+                            '</td>'+
+                            '<td>'+
+                                '<a class="btn btn-warning btn-sm update-news-btn" data-id="'+key+'" data-descripcion="'+item.descripcionNews+'" data-src="'+image+'" data-principal="'+item.isPrincipal+'" data-image="'+item.fileName+'"><i class="fas fa-edit"></i></a>'+
+                                '<a class="btn btn-danger btn-sm delete-btn" data-id="'+key+'" data-image="'+item.fileName+'"><i class="fas fa-trash-alt"></i></a>'+
+                            '</td>'+
+                            '</tr>'    
+                    }
+                    
+                    $("#render").html(cad);
+                });
+            }
+        
+        </script>
+
+        <div class="wrapper d-flex align-items-stretch">
+            <nav id="sidebar">
+                <div class="p-4 pt-5">
+                <a href="#" class="img logo rounded-circle mb-5" style="background-image: url(images/logo.jpg);"></a>
+                <ul class="list-unstyled components mb-5">
+                    <div class="list-group" id="list-tab" role="tablist">
+                        <li>
+                            <a href="../">Caminatas caninas</a>
+                        </li>
+                        <li>
+                            <a href="../adoption">Adopciones</a>
+                        </li>
+                        <li class="active">
+                            <a href="#">Noticias y avisos</a>
+                        </li>
+                        <li>
+                            <a href="../users">Usuarios</a>
+                        </li>
+                        <li>
+                            <a href="../info">Información contacto</a>
+                        </li>
+                        <li>
+                            <a href="../about">Acerca de nosotros</a>
+                        </li>
+                        <li>
+                            <a href="../ayudog">Ayudog</a>
+                        </li>
+                        <li>
+                            <a href="../../adoptions/adoption.html">Admin visual</a>
+                        </li>
+                    </div>
+                </ul>
+
+            <div class="footer">
+                
+            </div>
+
+        </div>
+            </nav>
+
+            <!-- Page Content  -->
+            <div id="content" class="p-4 p-md-5">
+                <a href="#" id="add" class="float">
+                    <i class="fa fa-plus my-float"></i>
+                </a>
+                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                    <div class="container-fluid">
+
+                        <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                        <i class="fa fa-bars"></i>
+                        <span class="sr-only">Toggle Menu</span>
+                        </button>
+                        <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                            <i class="fa fa-bars"></i>
+                        </button>
+
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="nav navbar-nav ml-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="../">Caminatas caninas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="../adoption/">Adopciones</a>
+                            </li>
+                            <li class="nav-item active">
+                                <a class="nav-link" href="#">Noticias y avisos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="../users/">Usuarios</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="../info/">Información contacto</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="../about">Acerca de nosotros</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="../ayudog">Ayudog</a>
+                            </li>
+                        </ul>
+                        </div>
+                    </div>
+                </nav>
+                <style>
+                    .table100-head {
+                        font-family: OpenSans-Regular;
+                        font-size: 18px;
+                        color: #fff;
+                        line-height: 1.2;
+                        font-weight: unset;
+                    }
+                    .float{
+                        position:fixed;
+                        width:55px;
+                        height:55px;
+                        bottom:40px;
+                        right:5px;
+                        background-color:#FF3547;
+                        color:#FFF;
+                        border-radius:50px;
+                        text-align:center;
+                        box-shadow: 2px 2px 3px #999;
+                    }
+
+                    .my-float{
+                        margin-top:22px;
+                    }
+                </style>
+
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="list" role="tabpanel" aria-labelledby="list-caminatas-list">
+                        <div id="caminatas">
+                            <h2 class="mb-4">Noticias y anuncios</h2>
+                            <div class="container-fluid inner">
+                                <table class="table table-bordered ">
+                                    <thead class="table100-head" style="background: #36304A;">
+                                        <tr class="tableizer-firstrow">
+                                            <th style="width: 20%;">Archivo</th>
+                                            <th>Descripcion</th>
+                                            <th style="width: 20%;">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="render"></tbody>
+                                    
+                                </table>
+                            
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Noticias-->
+  <div class="modal fade" id="modalNews" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Agregar</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+          <div class="modal-body">
+              <div class="col-12">
+                  <div class="row p-3">
+                      <div class="col-12">
+                          <label for="basic-url">Imagen</label>
+                          <div class="input-group mb-3">
+                              <input type="file" id="file-input-news" class="form-control">
+                          </div>
+                      </div>
+                      <div class="col-12">
+                          <div class="form-group green-border-focus">
+                              <label for="basic-url">Descripción</label>
+                              <textarea id="descripcionNews" class="form-control" rows="3"></textarea>
+                          </div>
+                      </div>
+                      <div class="offset-3 col-6">
+                          <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="isPrincipal">
+                            <label class="custom-control-label" for="isPrincipal">¿Es noticia principal?</label>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div class="modal-footer">
+              <div class="col-12">
+                  <button id="acceptNews" type="button" class="btn btn-primary btn-block">Aceptar</button>
+              </div>
+          </div>
+      </div>
+    </div>
+  </div>
+<!--Noticias Edit-->
+        <div class="modal fade" id="modalNewsEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Editar</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="col-12">
+                    <form id="formNews">
+                        <div class="row p-3">
+                            <div class="col-12 text-center">
+                            <input type="hidden" name="key" id="keyNews">
+                            <input type="hidden" name="imageName" id="imageName">
+                            <img src="" id="srcEditWalk" style="height: 150px;" class="img-fluid" alt="">
+                            </div>
+                            <div class="col-12">
+                                <label for="basic-url">Imagen</label>
+                                <div class="input-group mb-3">
+                                    <input type="file" id="file-input-newsE" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group green-border-focus">
+                                    <label for="basic-url">Descripción</label>
+                                    <textarea id="descripcionNewsE" name="descripcion" class="form-control" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <div class="offset-3 col-6">
+                                <div class="custom-control custom-checkbox">
+                                <input type="checkbox" name="principal" class="custom-control-input" id="isPrincipalE">
+                                <label class="custom-control-label" for="isPrincipalE">¿Es noticia principal?</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-12">
+                        <button id="acceptNewsE" type="button" class="btn btn-primary btn-block">Aceptar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </body>
+</html>

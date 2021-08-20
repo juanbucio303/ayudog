@@ -1,0 +1,2010 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Adopción</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <link rel="shortcut icon" href="../../img/favicon.png" >
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../css/mdb.min.css">
+    <link rel="stylesheet" href="../../css/normalize.css">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/lightbox.css">
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <script src="../../js/jquery-3.3.1.min.js" charset="utf-8"></script>
+    <script src="../../js/popper.min.js" charset="utf-8"></script>
+    <script src="../../js/mdb.min.js" charset="utf-8"></script>
+    <script src="../../js/bootstrap.min.js" charset="utf-8"></script>
+    <script src="../../js/lightbox.js" charset="utf-8"></script>
+    <script src="../../js/smooth-scroll.min.js"></script>
+    <script src="../../js/fontawesome-all.js" charset="utf-8"></script>
+    <script src="../../js/parallax.js" charset="utf-8"></script>
+    <script src="../../js/scrollreveal.js"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <script src="./app.js"></script>
+    <script src="./init.js"></script>
+</head>
+
+<body >
+	<!-- Firebase App is always required and must be first -->
+	<script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-storage.js"> </script>
+	<script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-auth.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-database.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-firestore.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-messaging.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-functions.js"></script>
+    
+    
+	<!-- Inicializa o firebase -->
+	<script>
+
+        firebase.initializeApp(getInit());
+
+        $(document).ready(function(){
+            if(sessionStorage.length>0){
+                if(sessionStorage.access != null || sessionStorage.access != "" || sessionStorage.access != " "){
+                    readUserData();
+                    $("#database").click(function(){
+                        var fileInput = $("#file-input")[0].files[0].name;
+                        var title = $("#title").val();
+                        var subtitle = $("#subtitle").val();
+                        var description = $("#description").val();
+                        writeUserData(title, subtitle, description, fileInput); 
+                    });
+
+                    $("#logout").click(function(){
+                        firebase.auth().signOut().then(function() {
+                        // Sign-out successful.
+                        console.log("Sign-out successful");
+                        sessionStorage.clear();
+                        location.href = "https://jms-commits.github.io/Ayudog/src/session/";
+                        
+                        }).catch(function(error) {
+                        // An error happened.
+                        console.log("error> "+error);
+                        sessionStorage.clear();
+                        location.href = "https://jms-commits.github.io/Ayudog/src/session/";
+
+                        });
+                    });
+                    $("#title").change(function(){
+                        var title = $("#title").val();
+                        $("#txtTitle").html(`<h5 class="font3 color-txt" style="font-size:2.85vh" >`+title+`</h5>`);
+                    });
+                    $("#subtitle").change(function(){
+                        var title = $("#subtitle").val();
+                        console.log(title);
+                        $("#txtSubtitle").html(title);
+                    });
+                    $("#description").change(function(){
+                        var title = $("#description").val();
+                        console.log(title);
+                        $("#txtDesc").html(title);
+                    });
+                    
+                    $("#access").click(function(){
+                        alert(sessionStorage.access);
+                    });
+
+                    $("#delete").click(function(){
+                        sessionStorage.removeItem("access");
+                    });
+
+                    $("deleteElement").click(function(){
+                        
+                    });
+
+                    $("#adoption").on("click","#borrar", function(){
+                        var key = $(this).data("id");
+                        var image = $(this).data("src");
+                        var ref = firebase.storage().ref("prueba/");
+                        var tangRef = ref.child(image);
+                        tangRef.delete().then(function() {
+                            firebase.database().ref('/adoption/'+key).remove()
+                            readUserData()
+                        }).catch(function(error) {
+                            alert("Ha ocurrido un error intente más tarder")
+                        });
+                        
+                    })
+                }else{
+                    location.href = "https://jms-commits.github.io/Ayudog/src/session/";
+                }
+            }else{
+                location.href = "https://jms-commits.github.io/Ayudog/src/session/";
+            }
+            
+        });
+
+        function createrAccount(email, password, rol){
+          $("#modalLoading").modal("show");
+          firebase.auth().createUserWithEmailAndPassword(email, password).then(function(res){
+              firebase.database().ref("users/").push({
+                    email: email,
+                    rol: rol,
+              }).then((res) => {
+                  $("#modalLoading").modal("hide");
+                  $("#modalAddUser").modal("hide")
+              });
+          }).catch(function(error) {
+          // Handle Errors here.
+              var errorCode = error.code;
+              var errorMessage = error.message;
+              console.log(error);
+              $("#modalAddUser").modal("hide")
+              alert("Ha ocurrido un error inesperado intente más tarde");
+          });
+        }
+
+        function deleteWalk(key, image){
+          var key = key;
+          var image = image;
+          var ref = firebase.storage().ref("walk/");
+          var tangRef = ref.child(image);
+          console.log(ref);
+          console.log(ref.child(image));
+          console.log(tangRef);
+          tangRef.delete().then(function() {
+              firebase.database().ref('/walk/'+key).remove()
+              readWalkData()
+          }).catch(function(error) {
+            console.log(error);
+              alert("Ha ocurrido un error intente más tarde")
+          });
+        }      
+        function deleteAdoption(key, image){
+          var key = key;
+          var image = image;
+          var ref = firebase.storage().ref("adoption/");
+          var tangRef = ref.child(image);
+          tangRef.delete().then(function() {
+              firebase.database().ref('/adoption/'+key).remove()
+              readAdoptionData()
+          }).catch(function(error) {
+            console.log(error);
+              alert("Ha ocurrido un error intente más tarde")
+          });
+        }
+        function deleteNews(key, image){
+          var key = key;
+          var image = image;
+          var ref = firebase.storage().ref("news/");
+          var tangRef = ref.child(image);
+          tangRef.delete().then(function() {
+              firebase.database().ref('/news/'+key).remove()
+              readNewsData()
+          }).catch(function(error) {
+            console.log(error);
+              alert("Ha ocurrido un error intente más tarde")
+          });
+        }
+        function deleteAbout(key, image){
+          var key = key;
+          var image = image;
+          var ref = firebase.storage().ref("about/");
+          var tangRef = ref.child(image);
+          tangRef.delete().then(function() {
+              firebase.database().ref('/about/'+key).remove()
+              readAboutData()
+          }).catch(function(error) {
+            console.log(error);
+              alert("Ha ocurrido un error intente más tarde")
+          });
+        }
+
+        function deleteContact(key){
+          var key = key;
+          firebase.database().ref('/contact/'+key).remove()
+          readContactData()
+        }
+
+        function writeUserData(title, subtitle, description, image) {
+            firebase.database().ref('adoption/').push({
+                title: title,
+                subtitle: subtitle,
+                description: description,
+                image : image
+            }).then((res) => {
+                alert("Informacion guardada con exito");
+                setFile();
+                readUserData();
+                $("#basicExampleModal").modal("hide")
+
+            });
+        }
+        function writeWalkData(image, descripcion) {//Ok
+          $("#modalUpload").modal("show")
+          setFileWalk(null, null, image, descripcion);
+        }
+        function writeAdoption(nombre, descripcion, genero, edad, tamanio, image, vacunado, desparasitado) {
+          $("#modalUpload").modal("show")
+          setFileAdoption(null, null, nombre, descripcion, genero, edad, tamanio, image, vacunado, desparasitado);
+        }
+        function writeNews(descripcion, image, isPrincipal) {//Ok
+          $("#modalUpload").modal("show")
+          setFileNews(null, null, image, descripcion, isPrincipal);
+        }
+        function writeExperiences(descripcionExperiences, image) {
+            firebase.database().ref('experiences/').push({
+              descripcionExperiences: descripcionExperiences,
+                fileName : image.files[0].name
+            }).then((res) => {
+                alert("Informacion guardada con exito");
+                setFileExperience(image);
+                readExperiencesData();
+                $("#modalExperencies").modal("hide");
+
+            });
+        }
+        function writeAbout(descripcion, image) {
+          $("#modalUpload").modal("show")
+          setFileAbout(null, null, image, descripcion);
+        }
+
+        function writeContact(phone, email) {
+            $("#modalLoading").modal("show");
+                var storageUrl = 'contact/';
+                firebase.database().ref(storageUrl).push({
+                    phone: phone,
+                    email: email
+                }).then(() => {
+                    $("#modalLoading").modal("hide");
+                    readContactData()
+                    //readAdoptionData();
+                }).catch(function(e){
+                    alert("Ha ocurrido un error inesperado intente más tarde");
+                    $("#modalLoading").modal("hide");
+                    console.log(e);
+                });
+        
+        }
+
+        function UpdateContact(phone, email, key) {
+                var storageUrl = 'contact/';
+                firebase.database().ref(storageUrl+key).update({
+                    phone: phone,
+                    email: email
+                }).then(() => {
+                  console.log("then");
+                  readContactData() 
+                  $("#modalLoading").modal("hide");
+                  $("#modalLoading").modal("hide");
+                    //readAdoptionData();
+                }).catch(function(e){
+                    alert("Ha ocurrido un error inesperado intente más tarde");
+                    $("#modalLoading").modal("hide");
+                    console.log(e);
+                });
+        
+        }
+        function readUserData() {
+            var cad = "";
+            firebase.database().ref('/adoption/').once('value').then(async function(snapshot) {
+                for(var key in snapshot.val()){
+                    var item = snapshot.val()[key];
+                    var image;
+                    var ref = firebase.storage().ref("prueba/");
+                    var tangRef = ref.child(item.image);
+                    image = await tangRef.getDownloadURL()
+                    cad+= '<div class="card col-3"><a id="borrar" data-id="'+key+'" data-src="'+item.image+'"><i class="fas fa-times-circle text-dang"></i></a><div class="view view-cascade overlay"><img class="card-img-top" src="'+image+'" alt="Card image cap"><a href="#!"><div class="mask rgba-white-slight"></div></a></div><div class="card-body card-body-cascade text-center"><h4 class="card-title text-dang"><strong>'+item.title+'</strong></h4><p class="card-text">'+item.description+'</p><h5 class="blue-text pb-2"><strong>Contactanos por Mina</strong></h5><a class="px-2 fa-lg text-whatsapp"><i class="fab fa-whatsapp text-whatsapp" style="color: #00E676;"></i></a><a class="px-2 fa-lg fb-ic"><i class="fab fa-facebook-f text-facebook" style="color: #4267B2;"></i></a></div></div>';
+                }
+                $("#adoption").html(cad);
+            });
+        }
+        function readWalkData() {
+            var cad = "";
+            firebase.database().ref('/walk/').once('value').then(async function(snapshot) {
+                for(var key in snapshot.val()){
+                    var item = snapshot.val()[key];
+                    var image;
+                    var ref = firebase.storage().ref("walk/");
+                    var tangRef = ref.child(item.fileName);
+                    var blank = item.descripcionWalk!=null?item.descripcionWalk:"";
+                    image = await tangRef.getDownloadURL();
+                    console.log(image)
+                    cad+= '<div class=" col-xs-12 col-md-4 container2">'
+                    if (item.type == "mp4") {
+                      cad+= '<iframe style="height: 270px; object-fit: cover; width: 100%; border-radius:5px;" class="mt-4" src="'+image+'" frameborder="0" allowfullscreen></iframe></iframe>'
+                    }else{
+                      cad+= '<img src="'+image+'" style="height: 270px; object-fit: cover; width: 100%; border-radius:5px;" class="mt-4" alt="narrower">'
+                    }
+                    cad+= '<div class="overlay">'+
+                        '<div class="row">'+
+                          '<div class="col-12">'+
+                            '<a class="btn btn-danger btn-sm delete-btn" data-id="'+key+'" data-image="'+item.fileName+'" data-src="'+image+'"><i class="fas fa-trash-alt"></i></a>'+
+                            '<a class="btn btn-warning btn-sm update-walk-btn" data-id="'+key+'" data-image="'+item.fileName+'" data-descripcion="'+item.descripcionWalk+'" data-src="'+image+'"><i class="fas fa-edit"></i></a>'+
+                          '</div>'+
+                        '</div>'+
+                          '<div class="row">'+
+                            '<div class="offset-1 col-10" style="overflow-y:auto;max-height:100px;">'+
+                              '<label class="text-center text-white" style="font-size:14px;">'+blank+'</label>'+
+                            '</div>'+
+                          '</div>'+
+                        '</div></div>';
+                }
+                //cad+= '<div class=" col-xs-12 col-md-4 container2" style="margin-top:25px"><embed autoplay style="height: 270px; width:100%;" src="https://instagram.fpbc1-1.fna.fbcdn.net/v/t50.2886-16/118068929_181478060103506_4411081217395012193_n.mp4?_nc_ht=instagram.fpbc1-1.fna.fbcdn.net&_nc_cat=102&_nc_ohc=nRpD4YuBbX4AX9oxDqp&oe=5F45F126&oh=b5cde6b211345f406c29ca4eb694ce0a" type="video/mp4"><div class=""><div class="text2"><a class="btn btn-danger" >Eliminar</a></div></div></div>';
+
+                //<embed style="height: 300px;" src="https://instagram.fpbc1-1.fna.fbcdn.net/v/t50.2886-16/118068929_181478060103506_4411081217395012193_n.mp4?_nc_ht=instagram.fpbc1-1.fna.fbcdn.net&_nc_cat=102&_nc_ohc=nRpD4YuBbX4AX9oxDqp&oe=5F45F126&oh=b5cde6b211345f406c29ca4eb694ce0a" type="video/mp4">
+
+                $("#walkRender").html(cad);
+            });
+        }
+        
+        function readAdoptionData() {
+            var cad = "";
+            firebase.database().ref('/adoption/').once('value').then(async function(snapshot) {
+                for(var key in snapshot.val()){
+                    var item = snapshot.val()[key];
+                    var image;
+                    var descripcion = item.descripcion.substring(0, 133)
+                    var ref = firebase.storage().ref("adoption/");
+                    var tangRef = ref.child(item.fileName);
+                    image = await tangRef.getDownloadURL()
+                    
+                    cad+= 
+                    '<div class="col-md-3 col-sm-12 col-xs-12" style="margin-top: 10px;"><div class="cardS"><div class="image">'+
+                      '<img style="background-size: cover;width: 100%;height: 100%;" src="'+image+'"/>'+
+                      '</div><div class="details">'+
+                        '<div class="center"><h1>'+item.nombre+'<br><span>Perro en adopción</span></h1>'+
+                          '<p style="font-size: 10px;margin-bottom: 0;">'+descripcion+'<a class="seeDetail" data-id="'+key+'" style="text-decoration: underline white; background: none;"> Ver más</a></p>'+
+                          '<table class="table table-sm" style="margin-top: 0; margin-bottom: 0;"><thead><tr><td>Género</td><td>Edad</td><td>Tamaño</td></tr></thead><tbody><tr><td>'+item.genero+'</td><td>'+item.edad+'</td><td>'+item.tamanio+'</td></tr></tbody></table>'+
+                          '<div class="btn-group" role="group" aria-label="Basic example">'+
+                            '<button type="button" class="btn btn-danger btn-sm delete-btn" data-id="'+key+'" data-image="'+item.fileName+'"><i class="fas fa-trash-alt"></i></button>'+
+                            '<button type="button" class="btn btn-warning btn-sm update-btn" data-id="'+key+'" data-image="'+item.fileName+'" data-name="'+item.nombre+'" data-description="'+item.descripcion+'" data-edad="'+item.edad+'" data-genero="'+item.genero+'" data-tamanio="'+item.tamanio+'" data-vacunado="'+item.vacunado+'" data-desparasitado="'+item.desparasitado+'" data-video="'+item.video+'"><i class="fas fa-edit"></i></button>'+
+                            '</div></div></div></div></div>'
+
+                   
+                    
+                }
+                $("#adoptionRender").html(cad);
+            });
+        }
+        function readNewsData() {
+            var cad = "";
+            firebase.database().ref('/news/').once('value').then(async function(snapshot) {
+                for(var key in snapshot.val()){
+                    var item = snapshot.val()[key];
+                    var image;
+                    var ref = firebase.storage().ref("news/");
+                    var tangRef = ref.child(item.fileName);
+                    image = await tangRef.getDownloadURL();
+                    var text1 = item.descripcionNews.substring(0, 87);
+                    var text2 = item.descripcionNews.substring(87, text1.lenght);
+                    if(item.isPrincipal == 1){
+                      cad+= '<div class="col-12" style="margin-top:20px;">'+
+                        '<div class="row">'+
+                          '<div class="col-xs-12 col-sm-12 col-md-4" style="margin: auto;">'+
+                            '<a class="btn btn-danger btn-sm delete-btn" data-id="'+key+'" data-image="'+item.fileName+'">X</a>'+
+                            '<a class="btn btn-warning btn-sm update-news-btn" data-id="'+key+'" data-descripcion="'+item.descripcionNews+'" data-src="'+image+'" data-principal="'+item.isPrincipal+'" data-image="'+item.fileName+'"><i class="fas fa-edit"></i></a>'+
+                            '<img src="'+image+'" style="border-radius: 7%;" class="card-img-top col-12" alt="narrower">'+
+                          '</div>'+
+                          '<div class="col-md-8 col-sm-12 col-xs-12  text-white">'+item.descripcionNews+'</div>'+
+                          '</div>'+
+                        '</div>';
+                    }else{
+                      cad+='<div class="col-xs-12 col-sm-12 col-md-4 text-news">'+
+                              '<a class="btn btn-danger btn-sm delete-btn" data-id="'+key+'" data-image="'+item.fileName+'">X</a>'+
+                              '<a class="btn btn-warning btn-sm update-news-btn" data-id="'+key+'" data-descripcion="'+item.descripcionNews+'" data-src="'+image+'" data-principal="'+item.isPrincipal+'" data-image="'+item.fileName+'"><i class="fas fa-edit"></i></a>'+
+                              '<div class="mt-4 text-white" style="overflow: hidden; background: #5c5c5c; border-radius: 5px;" >'+
+                          '<div class="row" style="margin: auto; margin-right: -1rem; margin-left: -1rem;">'+
+                            '<img src="'+image+'" class="card-img-top" alt="narrower">'+
+                          '</div><div class="p-4">'+text1+'<strong><a class="text-white btn-see" id="'+key+'" data-id="'+key+'" style="text-decoration: underline white;"> Ver más...</a></strong><div class="seeMore" id="'+key+'">'+text2+'<a class="text-white btn-see-less" id="'+key+'" style="text-decoration: underline white;display:none"> Ver menos</a></div></div></div></div>'
+                    }
+                    
+                    //cad+= '<div class="cardBox"><div class="card"><div class="front" style="background-image: url('+image+');background-size: cover;"></div><div class="back"><h3>'+item.nombre+'</h3><small>Perro en adopción</small><p style="font-size: 2vh;margin-bottom: 0;">'+item.descripcion+'...</p><table class="table table-sm" style="margin-top: 0; margin-bottom: 0;"><thead><tr><td>Género</td><td>Edad</td><td>Tamaño</td></tr></thead><tbody><tr><td>'+item.genero+'</td><td>'+item.edad+'</td><td>'+item.tamanio+'</td></tr></tbody></table><a class="btn btn-block " style="padding: 0; background: #DE5555;"><i class="fas fa-trash-alt" style="margin-right: 5px;"></i>Eliminar</a></div></div></div>';
+                }
+                
+                $("#newsRender").html(cad);
+            });
+        }
+        function readExperiencesData() {
+            var cad = '<div class="carousel-inner" role="listbox">';
+            firebase.database().ref('/experiences/').once('value').then(async function(snapshot) {
+              var count = 0;
+                for(var key in snapshot.val()){
+                    var item = snapshot.val()[key];
+                    var image;
+                    var ref = firebase.storage().ref("experience/");
+                    var tangRef = ref.child(item.fileName);
+                    image = await tangRef.getDownloadURL();
+                    if (count>=1) {
+                      //cad+='<div class="carousel-item active"><div class="col-12" style="float:left"><div class="row"><div class="col-xs-12 col-sm-12 col-md-4" style="margin: auto;"><img src="'+image+'" style="border-radius: 7%;" class="card-img-top col-12" alt="narrower"></div><div class="col-md-8 col-sm-12 col-xs-12 text-white">'+item.descripcionExperiences+'</div></div></div></div>'
+                    }else{
+                      //cad+='<div class="carousel-item"><div class="col-12" style="float:left"><div class="row"><div class="col-xs-12 col-sm-12 col-md-4" style="margin: auto;"><img src="'+image+'" style="border-radius: 7%;" class="card-img-top col-12" alt="narrower"></div><div class="col-md-8 col-sm-12 col-xs-12  text-white">'+item.descripcionExperiences+'</div></div></div></div>'
+                    }
+                    count++;
+                }
+                var ht = '<div class="carousel-item active"><div class="col-12" style="float:left"><div class="row"><div class="col-xs-12 col-sm-12 col-md-4" style="margin: auto;"><img src="../../img/perro-ilove.jpg" style="border-radius: 7%;" class="card-img-top col-12" alt="narrower"></div><div class="col-md-8 col-sm-12 col-xs-12 text-white">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Maxime exercitationem placeat, dolor iusto inventore quo veritatis ipsum eligendi repudiandae in, enim possimus dolores. Pariatur autem cupiditate accusamus consequuntur tempora sit.Lorem ipsum dolor sit amet consectetur, adipisicing elit. Maxime exercitationem placeat, dolor iusto inventore quo veritatis ipsum eligendi repudiandae in, enim possimus dolores. Pariatur autem cupiditate accusamus consequuntur tempora sit.</div></div></div></div>'
+                +'<div class="carousel-item"><div class="col-12" style="float:left"><div class="row"><div class="col-xs-12 col-sm-12 col-md-4" style="margin: auto;"><img src="../../img/caminata2.jpg" style="border-radius: 7%;" class="card-img-top col-12" alt="narrower"></div><div class="col-md-8 col-sm-12 col-xs-12  text-white">2do Lorem ipsum dolor sit amet consectetur, adipisicing elit. Maxime exercitationem placeat, dolor iusto inventore quo veritatis ipsum eligendi repudiandae in, enim possimus dolores. Pariatur autem cupiditate accusamus consequuntur tempora sit.Lorem ipsum dolor sit amet consectetur, adipisicing elit. Maxime exercitationem placeat, dolor iusto inventore quo veritatis ipsum eligendi repudiandae in, enim possimus dolores. Pariatur autem cupiditate accusamus consequuntur tempora sit.</div></div></div></div>'
+                cad+='</div>'
+                console.log(cad);
+                $("#experienceRender").html(cad);
+            });
+        }
+        function readAboutData() {
+          var cad = '';
+            firebase.database().ref('/about/').once('value').then(async function(snapshot) {
+              var count = 0;
+                for(var key in snapshot.val()){
+                    var item = snapshot.val()[key];
+                    var image;
+                    var ref = firebase.storage().ref("about/");
+                    var tangRef = ref.child(item.fileName);
+                    image = await tangRef.getDownloadURL();
+                    image = image == null || image.trim() == ""?"":image
+                      
+                    
+                    cad+='<tr>'+
+                        '<td>'+
+                            '<img src="'+image+'" style="height: 100px;width: auto; margin: auto;">'+
+                          '</td>'+
+                        '<td>'+item.descripcionAbout+'</td>'+
+                        '<td>'+
+                          '<a class="btn-danger btn-sm btn-delete-about" data-id="'+key+'" data-image="'+item.fileName+'"><i class="fas fa-trash-alt"></i></a>'+
+                          '<a class="btn-warning btn-sm btn-edit-about" data-id="'+key+'" data-image="'+item.fileName+'" data-descripcion="'+item.descripcionAbout+'"><i class="fas fa-edit"></i></a>'+
+                        '</td>'+
+                      '</tr>'
+                }
+                $("#aboutRender").html(cad);
+            });
+        }
+        function readContactData() {
+          var cad = '';
+            firebase.database().ref('/contact/').once('value').then(async function(snapshot) {
+              var count = 0;
+                for(var key in snapshot.val()){
+                    var item = snapshot.val()[key];
+                      
+                    cad+='<tr>'+
+                        '<td>'+item.phone+'</td>'+
+                        '<td>'+item.email+'</td>'+
+                        '<td>'+
+                          '<a class="btn-danger btn-sm btn-delete-contact" data-id="'+key+'""><i class="fas fa-trash-alt"></i></a>'+
+                          '<a class="btn-warning btn-sm btn-edit-contact" data-id="'+key+'" data-phone="'+item.phone+'" data-email="'+item.email+'"><i class="fas fa-edit"></i></a>'+
+                        '</td>'+
+                      '</tr>'
+                }
+                $("#infoRender").html(cad);
+            });
+        }
+
+    </script>
+
+
+    <script>
+                
+        $(document).ready(function(){
+            readWalkData();
+            readAdoptionData();
+            readNewsData();
+            //readExperiencesData()
+
+            $("#addUser").click(function(){
+              $("#modalAddUser").modal("show")
+            });
+            $("#acceptAddUser").click(function(){
+              var email = $("#email").val()
+              var pass = $("#password").val()
+              var rol = $("#rol").val()
+              createrAccount(email, pass, rol);
+            });
+
+            $(".ing").hide();
+
+            $('.botonF1').click(function(){
+              $('.btn').addClass('animacionVer');
+            })
+            $('.contenedor').mouseleave(function(){
+              $('.btn').removeClass('animacionVer');
+            })
+            var id = 0
+            $("#newsRender").on("click",".btn-see",function(){
+              id = $(this).data("id");
+              $(".btn-see #"+id).hide();
+              $(".btn-see-less #"+id).show();
+              $(".seeMore #"+id).show();
+            })
+            $("#newsRender").on("click",".btn-see-less",function(){
+              id = $(this).attr("id");
+              $(".btn-see-less #"+id).hide();
+              $(".btn-see #"+id).show();
+              $(".seeMore #"+id).hide();
+            })
+
+            $(".toAdopt").click(function(){
+              window.location.href = "#adoption"
+            })
+
+            $(".mailpetadop").click(function(){
+              window.open("https://mail.google.com/mail/?compose=1&view=cm&fs=1&to=info@ayudog.com&su=subject&body=hola buen dia",'_blank');
+            })
+
+            $(".mailtoInfo").click(function(){
+              window.open("https://mail.google.com/mail/?compose=1&view=cm&fs=1&to=info@ayudog.com&su=subject&body=hola buen dia",'_blank');
+            })
+
+            $("#addWalk").click(function(){
+                $("#modalWalk").modal("show");
+            });
+            $("#acceptImageWalk").click(function(){
+                var file = $("#file-input-walk")[0];
+                var descripcion = $("#descripcionWalk").val();
+                writeWalkData(file, descripcion);
+                readWalkData();
+            })
+
+            $("#addAdoption").click(function(){
+                $("#modalAdoption").modal("show");
+            });
+            $("#acceptAdoption").click(function(){
+                var name = $("#nombre").val();
+                var genero = $("#genero").val();
+                var edad = $("#edad").val();
+                var descripcion= $("#descripcionAdoption").val();
+                var tamanio= $("#tamanio").val();
+                var file = $("#file-input-adoption")[0];
+                var vacunado = $("#vacunado").val();
+                var desparasitado = $("#desparasitado").val();
+                
+                writeAdoption(name, descripcion, genero, edad, tamanio, file, vacunado, desparasitado);
+                readAdoptionData();
+            });
+
+            $("#addNews").click(function(){
+                $("#modalNews").modal("show");
+            });
+            $("#acceptNews").click(function(){
+                var descripcion= $("#descripcionNews").val();
+                var file = $("#file-input-news")[0];
+                var isPrincipal = $("#isPrincipal").is(':checked') ? 1 : 0;
+                writeNews(descripcion, file, isPrincipal);
+            });
+            
+            $("#addExperience").click(function(){
+                $("#modalExperience").modal("show");
+            });
+            $("#acceptExperiences").click(function(){
+                var descripcionExperiences= $("#descripcionExperiences").val();
+                var file = $("#file-input-experiences")[0];
+                writeExperiences(descripcionExperiences, file);
+                readExperiencesData();
+            })
+
+            $("#walk").on("click", ".delete-btn",function(){
+              var key = $(this).data("id");
+              var imageName = $(this).data("image");
+              deleteWalk(key, imageName);
+            })
+            $("#walkRender").on("click", ".update-walk-btn", async function(){
+              var key = $(this).data("id")
+              var image = $(this).data("image")
+              var descripcion = $(this).data("descripcion")
+              var src = $(this).data("src")
+              $("#srcE").attr("src", src)
+              $("#key").val(key)
+              $("#fileName").val(image)
+              $("#descripcionWalkE").val(descripcion)
+              $("#modalWalkEdit").modal("show")
+            })
+            $("#acceptImageWalkE").click(function(){
+              var form = getFormData($("#formWalk"))
+              var file = $("#file-input-walkE")[0]
+              setFileWalk(form.key, form.fileName, file, form.descripcion)
+              $("#file-input-walkE").val("")
+            })
+
+            
+            $("#adoptionRender").on("click", ".delete-btn",function(){
+              var key = $(this).data("id");
+              var imageName = $(this).data("image");
+              deleteAdoption(key, imageName);
+            })
+            $("#adoptionRender").on("click", ".seeDetail",function(){
+              var key = $(this).data("id");
+              var item;
+              console.log(key);
+              firebase.database().ref('/adoption/'+key).once('value').then(async function(snapshot) {
+                var count = 0;
+                item = await snapshot.val();
+                var image;
+                var ref = firebase.storage().ref("adoption/");
+                var tangRef = ref.child(item.fileName);
+                image = await tangRef.getDownloadURL();
+                $("#dataImage").attr("src", image);
+                var cad = ""
+                cad+= '<tr><td class="text-white" style="background-color: #515151;">Nombre</td><td>'+item.nombre+'</td></tr>'
+                cad+= '<tr><td class="text-white" style="background-color: #515151;">Tamaño</td><td>'+item.tamanio+'</td></tr>'
+                cad+= '<tr><td class="text-white" style="background-color: #515151;">Genero</td><td>'+item.genero+'</td></tr>'
+                cad+= '<tr><td class="text-white" style="background-color: #515151;">Edad</td><td>'+item.edad+'</td></tr>'
+                cad+= item.vacunado!=null?'<tr><td class="text-white" style="background-color: #515151;">Vacunado</td><td>'+item.vacunado+'</td></tr>':""
+                cad+= item.desparasitado!=null?'<tr><td class="text-white" style="background-color: #515151;">Desparasitado</td><td>'+item.desparasitado+'</td></tr>':""
+                //var desc= '<tr><td>'+item.descripcion+'</td></tr>'
+                var desc= '<tr><td>'+item.descripcion+'</td></tr>'
+                $("#btn-save").html('');
+
+                $("#editFile").html("");
+                $("#renderTabDetailVideo").html("");
+                $("#renderTabDetail").html(cad);
+                $("#renderTabDetailDesc").html(desc);
+                $("#modalAdoptionDetail").modal("show");
+
+              });
+              //var imageName = $(this).data("image");
+            })
+
+            $("#adoptionRender").on("click", ".update-btn", async function(){
+              var key = $(this).data("id");
+              var imageName = $(this).data("image");
+              var videoName = $(this).data("video");
+              var tamanio = $(this).data("tamanio");
+              var descripcion = $(this).data("description");
+              var edad = $(this).data("edad");
+              var genero = $(this).data("genero");
+              var nombre = $(this).data("name");
+              var vacunado = $(this).data("vacunado");
+              var desparasitado = $(this).data("desparasitado");
+              var imageName  = $(this).data("image");
+              var image;
+              var video;
+              var ref = firebase.storage().ref("adoption/");
+              var tangRef = ref.child(imageName);
+              var tangRefV;
+              if(video!=null){
+                tangRefV = ref.child(videoName);
+                video = await tangRefV.getDownloadURL()
+              }
+              image = await tangRef.getDownloadURL()
+              $("#dataImage").attr("src", image);
+              var cad = ""
+              cad+= '<tr><td class="text-white" style="background-color: #515151;">Nombre</td><td><input type="hidden" name="key" value="'+key+'"/><input type="hidden" name="imageName" value="'+imageName+'"/><input type="text" class="form-control" name="nombre" value="'+nombre+'"/></td></tr>'
+              cad+= '<tr><td class="text-white" style="background-color: #515151;">Tamaño</td><td><input type="text" class="form-control" name="tamanio" value="'+tamanio+'"/></td></tr>'
+              cad+= '<tr><td class="text-white" style="background-color: #515151;">Genero</td><td><input type="text" class="form-control" name="genero" value="'+genero+'"/></td></tr>'
+              cad+= '<tr><td class="text-white" style="background-color: #515151;">Edad</td><td><input type="text" class="form-control"   name="edad" value="'+edad+'"/></td></tr>'
+              cad+= '<tr><td class="text-white" style="background-color: #515151;">Vacunado</td><td><select class="form-control"  name="vacunado" id="vacunadoE"><option value="Si">Si</option><option value="No">No</option></select></td></tr>'
+              cad+= '<tr><td class="text-white" style="background-color: #515151;">Desparasitado</td><td><select class="form-control"  name="desparasitado" id="desparasitadoE"><option value="Si">Si</option><option value="No">No</option></select></td></tr>'
+              
+              var cadV= video!=null?'<tr><td><iframe style="height: 270px; object-fit: cover; width: 100%; border-radius:5px;" class="mt-4" src="'+video+'" frameborder="0" allowfullscreen></iframe></iframe>':""
+              cadV+='<input type="file" id="file-video-adoption" name="video" class="form-control"/></td></tr>'
+              var inputImage='<input type="file" id="file-image-adoption" name="imagen" class="form-control"/></td></tr>'
+              var btnSave='<a id="saveAdoption" class="btn btn-primary btn-block">Guardar</a></td></tr>'
+              var desc= '<tr><td><textarea name="descripcion" class="form-control" rows="3">'+descripcion+'</textarea></td></tr>'
+              
+              $("#renderTabDetail").html(cad);
+              $("#editFile").html(inputImage);
+              $("#renderTabDetailVideo").html(cadV);
+              $("#renderTabDetailDesc").html(desc);
+              $("#btn-save").html(btnSave);
+
+              $("#vacunadoE").val(vacunado)
+              $("#desparasitadoE").val(desparasitado)
+              $("#modalAdoptionDetail").modal("show");
+
+
+              //deleteNews(key, imageName);
+            })
+            $("#btn-save").on("click", "#saveAdoption", async function(){
+              var form = getFormData($("#formEditAdoption"));
+              var image = $("#file-image-adoption")[0]; 
+              var video = $("#file-video-adoption")[0];
+              console.log(video);
+              setFileAdoption(form.key, form.imageName, form.nombre, form.descripcion, form.genero, form.edad, form.tamanio, image, form.vacunado, form.desparasitado);
+            })
+
+            $("#newsRender").on("click", ".delete-btn",function(){
+              var key = $(this).data("id");
+              var imageName = $(this).data("image");
+              deleteNews(key, imageName);
+            })
+
+            $("#newsRender").on("click", ".update-news-btn",function(){
+              var key = $(this).data("id");
+              var imageName = $(this).data("image");
+              var principal = $(this).data("principal");
+              var descripcion = $(this).data("descripcion");
+              var src = $(this).data("src");
+              $("#file-input-newsE")
+              
+              $("#keyNews").val(key)
+              $("#imageName").val(imageName)
+              $("#descripcionNewsE").val(descripcion)
+              $("#srcEditWalk").attr("src", src)
+              $("#isPrincipalE").prop("checked", principal==1)
+              $("#modalNewsEdit").modal("show")
+              //setFileNews(key, imageName);
+            })
+            
+            $("#acceptNewsE").click(function(){
+              var form = getFormData($("#formNews"))
+              var file = $("#file-input-newsE")[0]
+              var isPrincipal = $("#isPrincipalE").is(':checked') ? 1 : 0;
+              setFileNews(form.key, form.imageName, file, form.descripcion, isPrincipal);
+            })
+
+            
+
+            $("#about").click(function(){
+              $("#modalAbout").modal("show")
+              readAboutData()
+            })
+
+            $("#acceptAbout").click(function(){
+              var file = $("#file-input-about")[0];
+              var descripcion = $("#descripcionAbout").val();
+              writeAbout(descripcion, file);
+            })
+
+            $("#aboutRender").on("click", ".btn-delete-about",function(){
+              var key = $(this).data("id");
+              var imageName = $(this).data("image");
+              deleteAbout(key, imageName);
+            })
+
+            $("#aboutRender").on("click", ".btn-edit-about",function(){
+              var key = $(this).data("id");
+              var imageName = $(this).data("image");
+              var descripcion = $(this).data("descripcion");
+              $("#keyAbout").val(key)
+              $("#imageNameAbout").val(imageName)
+              $("#descripcionAbout").val(descripcion)
+
+              console.log(descripcion);
+              console.log($("#keyAbout").val());
+              console.log($("#imageNameAbout").val());
+              console.log($("#descripcionAbout").val());
+              $("#acceptAbout").addClass("d-none")
+              $("#acceptAboutE").removeClass("d-none")
+              //deleteAbout(key, imageName);
+            })
+            $("#acceptAboutE").click(function(){
+              var file = $("#file-input-about")[0];
+              var descripcion = $("#descripcionAbout").val();
+              var key = $("#keyAbout").val();
+              var fileName = $("#imageNameAbout").val();
+              setFileAbout(key, fileName, file, descripcion)
+            })
+
+            $("#addInfoContact").click(function(){
+              readContactData()
+              $("#modalInfoContact").modal("show")
+            })
+            $("#acceptInfo").click(function(){
+              var form = getFormData($("#formContact"))
+              console.log(form.email);
+              console.log(form.phone);
+              writeContact(form.phone, form.email)
+            })
+
+            $("#infoRender").on("click", ".btn-edit-contact",function(){
+              var phone = $(this).data("phone")
+              var email = $(this).data("email")
+              var key = $(this).data("id")
+              $("#phoneContact").val(phone)
+              $("#emailContact").val(email)
+              $("#keyContact").val(key)
+              $("#acceptInfoE").removeClass("d-none")
+              $("#acceptInfo").addClass("d-none")
+            })
+
+            $("#acceptInfoE").click(function(){
+              var form = getFormData($("#formContact"))
+              console.log(form);
+              $("#modalLoading").modal("show");
+              UpdateContact(form.phone, form.email, form.key)
+            })
+
+            $("#infoRender").on("click", ".btn-delete-contact", function(){
+              var key = $(this).data("id")
+              deleteContact(key)
+            })
+        })
+
+      function getFormData($form){
+          var unindexed_array = $form.serializeArray();
+          var indexed_array = {};
+
+          $.map(unindexed_array, function(n, i){
+              indexed_array[n['name']] = n['value'];
+          });
+
+          return indexed_array;
+      }
+
+    </script>
+
+    <style>
+    .contenedor{
+        width:90px;
+        height:240px;
+        position:fixed;
+        right:0px;
+        bottom:0px;
+        z-index: 999;
+        cursor: pointer;
+    }
+    .botonF1{
+        width:60px;
+        height:60px;
+        border-radius:100%;
+        right:0;
+        bottom:0;
+        position:absolute;
+        margin:16px;
+        border:none;
+        outline:none;
+        color:#FFF;
+        background: #00bb2d;
+        font-size:36px;
+        -webkit-box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+                box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+        -webkit-transition:.3s;
+        -o-transition:.3s;
+        transition:.3s;
+        cursor: pointer;
+    }
+
+
+    .imgCard{
+        margin-top: 0;
+        margin-right: 0;
+    }
+    
+
+
+    .container2 {
+      position: relative;
+      width: 50%;
+    }
+
+    .image2 {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0%;
+      right: 100%;
+      background-color: white;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+      overflow: hidden;
+      width: 0;
+      height: 50%;
+      -webkit-transition: .5s ease;
+      -o-transition: .5s ease;
+      transition: .5s ease;
+    }
+
+    .container2:hover .overlay {
+      width: 100%;
+      left: 0;
+    }
+
+    .text2 {
+      color: white;
+      font-size: 20px;
+      position: absolute;
+      top: 20%;
+      left: 68%;
+      -webkit-transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
+    }
+    .flip-corner{
+      height: 50px;
+      position: relative;
+      top: 86%;
+      left: 46%;
+      border-radius: 10%;
+    }
+    .cardBox:hover .flip-corner {
+      display: none;
+    }
+    </style>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-hue fixed-top">
+        <div class="container">
+            <a class="navbar-brand px-lg-4 mr-0 d-lg-none" href="#">
+            <img src="../../img/favicon.png" height="70" alt="">
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#basicExampleNav" aria-controls="basicExampleNav"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-center font-weight-bold" id="basicExampleNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item font3">
+                        <a class="nav-link" id="addUser">
+                            <div class="esp">
+                                <i class="fa fa-plus-circle" aria-hidden="true"></i> Agregar Usuario
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item font3">
+                      <a class="nav-link" id="addInfoContact">
+                          <div class="esp">
+                              <i class="fa fa-plus-circle" aria-hidden="true"></i> Información contacto
+                          </div>
+                      </a>
+                  </li>
+
+                </ul>
+                <a class="navbar-brand px-lg-4 mr-0 d-none d-lg-block">
+                    <img src="../../img/favicon.png" height="70" alt="">
+                </a>
+                <ul class="navbar-nav">
+                    <li class="nav-item font3">
+                        <a class="nav-link" id="about">
+                            <div class="esp">
+                                Acerca de nosotros
+                            </div>
+                        </a>
+                    </li> 
+                    <li class="nav-item font3">
+                      <a class="nav-link" id="logout">
+                          <div class="esp">
+                              <i class="fa fa-sign-out-alt" aria-hidden="true"></i> Cerrar Sesión
+                          </div>
+                      </a>
+                  </li>                
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+	<div id="app" class="hide"></div>
+
+    <div id="render" class="container" style="padding-top: 8%;">
+        <div class="row" id="adoption">
+            
+        </div>
+
+        <!--Inicio-->
+
+        <div id="home" class="parallax-window full-height" data-position-y="center" data-parallax="scroll" data-image-src="../../img/perro_walk_2.jpg" style="background:rgba(21,21,21,0.2)"></div>
+        
+        <div class="text-center w-100 position-absolute d-block d-xl-none" style="bottom: 5%" >
+          <a href="#inicioRefsm" id="inicioRefsm">
+            <img src="../../img/down_arrow.png" style="width: 75px;filter: invert(1);">
+          </a>
+        </div>
+        <div class="text-center w-100 position-absolute d-none d-xl-block">
+          <a href="#inicioReflg" id="inicioReflg">
+            <img src="../../img/down_arrow.png" style="width: 90px;filter: invert(1);">
+          </a>
+        </div>
+
+        <div class="container">
+
+          <div class="contenedor">
+            <a class="botonF1 mailtoInfo">
+              <i class="fas fa-envelope" style="color: white;"></i>
+            </a>
+          </div>
+
+          <div class="container" id="walk">
+            <div class="color-txt display-4 font-weight-light mt-5 p-4 text-center" style="border-bottom: solid 3px #c8213c;">
+                <div class="row text-center">
+                    <div class="col-12">
+                        Caminatas Caninas <a class="" id="addWalk"><i style="font-size: 30px;" class="fas fa-plus-circle"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="row" id="walkRender">
+
+            </div>
+          </div>
+          
+          <div class="container" id="news">
+            <div class="">
+              <div class="color-txt display-4 font-weight-light mt-5 p-4 text-center" style="border-bottom: solid 3px #c8213c;">
+                    Noticias y Avisos <a id="addNews"><i style="font-size: 30px;" class="fas fa-plus-circle"></i></a>
+              </div>
+
+              <div class="row" id="newsRender">
+                  
+              </div>
+            </div>
+          </div>
+  
+        <style>
+
+            .cardBox {
+              float: left;
+              font-size: 1.2em;
+              margin: 1% 0 0 1%;
+              perspective: 800px;
+              transition: all 0.3s ease 0s;
+              width: 23.7%;
+            }
+
+            .cardBox:hover .card {
+              transform: rotateY( 180deg);
+            }
+
+            .card {
+              background: #222;
+              cursor: default;
+              height: 250px;
+              transform-style: preserve-3d;
+              transition: transform 0.4s ease 0s;
+              width: 100%;
+              -webkit-animation: giro 1s 1;
+              animation: giro 1s 1;
+            }
+
+            .card p {
+              margin-bottom: 1.8em;
+            }
+
+            .card .front,
+            .card .back {
+              backface-visibility: hidden;
+              box-sizing: border-box;
+              color: white;
+              display: block;
+              font-size: 1.2em;
+              height: 100%;
+              padding: 0.8em;
+              position: absolute;
+              text-align: center;
+              width: 100%;
+              border-radius: 5px;
+            }
+
+            .card .front strong {
+              background: #fff;
+              border-radius: 100%;
+              color: #222;
+              font-size: 1.5em;
+              line-height: 30px;
+              padding: 0 7px 4px 6px;
+            }
+
+            .card .back {
+              transform: rotateY( 180deg);
+            }
+
+            .card .back a {
+              padding: 0.3em 0.5em;
+              background: #333;
+              color: #fff;
+              text-decoration: none;
+              border-radius: 1px;
+              font-size: 0.9em;
+              transition: all 0.2s ease 0s;
+            }
+
+            .card .back a:hover {
+              background: #fff;
+              color: #333;
+              text-shadow: 0 0 1px #333;
+            }
+
+            .cardBox:nth-child(1) .card .back {
+              background: cornflowerblue;
+            }
+
+            .cardBox:nth-child(2) .card .back {
+              background: orange;
+            }
+
+            .cardBox:nth-child(3) .card .back {
+              background: yellowgreen;
+            }
+
+            .cardBox:nth-child(4) .card .back {
+              background: tomato;
+            }
+
+            .cardBox:nth-child(2) .card {
+              -webkit-animation: giro 1.5s 1;
+              animation: giro 1.5s 1;
+            }
+
+            .cardBox:nth-child(3) .card {
+              -webkit-animation: giro 2s 1;
+              animation: giro 2s 1;
+            }
+
+            .cardBox:nth-child(4) .card {
+              -webkit-animation: giro 2.5s 1;
+              animation: giro 2.5s 1;
+            }
+
+            @-webkit-keyframes giro {
+              from {
+                transform: rotateY( 180deg);
+              }
+              to {
+                transform: rotateY( 0deg);
+              }
+            }
+
+            @keyframes giro {
+              from {
+                transform: rotateY( 180deg);
+              }
+              to {
+                transform: rotateY( 0deg);
+              }
+            }
+
+            @media screen and (max-width: 767px) {
+              .cardBox {
+                margin-left: 2.8%;
+                margin-top: 3%;
+                width: 46%;
+              }
+              .card {
+                height: 285px;
+              }
+              .cardBox:last-child {
+                margin-bottom: 3%;
+              }
+            }
+
+            @media screen and (max-width: 480px) {
+              .cardBox {
+                width: 94.5%;
+              }
+              .card {
+                height: 260px;
+              }
+            }
+
+        </style>
+
+        <div class="container" id="adoption" >
+          <div class="color-txt display-4 font-weight-light mt-5 p-4 text-center" style="border-bottom: solid 3px #c8213c;">
+            Adopción <a class="" id="addAdoption"><i style="font-size: 30px;" class="fas fa-plus-circle"></i></a>
+          </div>
+          <div class="row" id="adoptionRender">
+            
+          </div>
+        </div>
+  
+        <div class="container" style="display: none;" id="experience">
+          <div class="">
+            <div class="color-txt display-4 font-weight-light mt-5 p-4 text-center" style="border-bottom: solid 3px #c8213c;">
+              <div class="row" style="margin: auto;">
+                <img src="../../img/perro3.1.png" style="margin:auto;max-height: 100px; width: 100px;" class="card-img-top" alt="narrower">
+              </div>
+                Experiencias vividas <a id="addExperience"><i style="font-size: 30px;" class="fas fa-plus-circle"></i></a>
+            </div>
+
+            <div id="multi-item-example" style="margin-top: 3%;" class="carousel slide carousel-multi-item" data-ride="carousel">
+              <div class="row" id="experienceRender">
+                  
+                  
+                  <a class="carousel-control-prev" style="left: -7%;" href="#multi-item-example" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                  </a>
+                  <a class="carousel-control-next" style="left: 95%;" href="#multi-item-example" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                  </a>
+                  
+              </div>
+              <div class="row">
+                <ol class="carousel-indicators">
+                  <li data-target="#multi-item-example" data-slide-to="0" class="active"></li>
+                  <li data-target="#multi-item-example" data-slide-to="1"></li>
+                </ol>
+              </div>
+            </div>
+
+            
+          </div>
+        </div>
+
+
+        <div class="container">
+            <div class="row">
+              
+             
+              
+            </div>
+        </div>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <!--Fin-->
+
+<style>
+ .cardS {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    width: 260px;
+    height: 250px;
+    background: #000;
+    border-radius: 7px;
+}
+.cardS .image {
+    width: 100%;
+    height: 100%;
+    border-radius: 7px;
+    overflow: hidden;
+}
+.cardS .image img {
+    width: 100%;
+    transition: .5s;
+}
+.cardS:hover .image img {
+    opacity: .5;
+    transform: translateX(30%);/*100%*/
+}
+.cardS .details {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 85%;/*100%*/
+    height: 100%;
+    background: #ffc107;
+    transition: .5s;
+    transform-origin: left;
+    transform: perspective(2000px) rotateY(-90deg);
+    border-radius: 7px;
+
+}
+.cardS:hover .details {
+    transform: perspective(2000px) rotateY(0deg);
+}
+.cardS .details .center {
+    padding: 20px;
+    text-align: center;
+    background: #fff;
+    position: absolute;
+    top: 50%;
+    height: 100%;
+    width: 100%;
+    transform: translateY(-50%);
+    border-radius: 7px;
+
+}
+.cardS .details .center h1 {
+    margin: 0;
+    padding: 0;
+    color: #ff3636;
+    line-height: 20px;
+    font-size: 20px;
+    text-transform: uppercase;
+}
+.cardS .details .center h1 span {
+    font-size: 14px;
+    color: #262626;
+}
+.cardS .details .center p {
+    margin: 10px 0;
+    padding: 0;
+    color: #262626;
+}
+.cardS .details .center ul {
+    margin: 10px auto 0;
+    padding: 0;
+    display: table;
+}
+.cardS .details .center ul li {
+    list-style: none;
+    margin: 0 5px;
+    float: left;
+}
+.cardS .details .center ul li a {
+    display: block;
+    background: #262626;
+    color: #fff;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    transform: .5s;
+}
+.cardS .details .center ul li a:hover {
+    background: #ff3636;
+}
+</style>
+
+
+
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="basicExampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Agregar Post</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            <div class="modal-body">
+                <div class="col-12">
+                    <div class="row p-3">
+                        <div class="offset-1 col-5">
+                            <label for="basic-url">Titulo</label>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="title" aria-describedby="basic-addon3">
+                            </div>
+                        </div>
+                        <div class="col-5">
+                            <label for="basic-url">Subtitulo</label>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="subtitle" aria-describedby="basic-addon3">
+                            </div>
+                        </div>
+                        <div class="offset-1 col-10">
+                            <label for="basic-url">Imagen</label>
+                            <div class="input-group mb-3">
+                                <input type="file" id="file-input" class="form-control" aria-describedby="basic-addon3">
+                            </div>
+                        </div>
+                        <div class="offset-1 col-10">
+                            <div class="form-group green-border-focus">
+                                <label for="basic-url">Descripción</label>
+                                <textarea id="description" class="form-control" id="exampleFormControlTextarea5" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="col-12">
+                    <button id="database" type="button" class="btn btn-primary btn-block">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+<!-- Modal -->
+	
+</body>
+  <div class="modal fade" id="modalDelete" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          Esta seguro de eliminar el elemento.
+        </div>a
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="deleteElement">Aceptar</button>
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!--Inician Modals -->
+<!--Caminatas-->
+  <div class="modal fade" id="modalWalk" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Agregar Post</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body">
+                  <div class="col-12">
+                      <div class="row p-3">
+                          <div class="col-12">
+                              <label for="basic-url">Imagen</label>
+                              <div class="input-group mb-3">
+                                  <input type="file" id="file-input-walk" class="form-control" aria-describedby="basic-addon3">
+                              </div>
+                          </div>
+                          <div class="col-12">
+                            <div class="form-group green-border-focus">
+                                <label for="basic-url">Descripción</label>
+                                <textarea id="descripcionWalk" class="form-control" rows="3"></textarea>
+                            </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              <div class="modal-footer">
+                  <div class="col-12">
+                      <button id="acceptImageWalk" type="button" class="btn btn-primary btn-block">Aceptar</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+  <!--Caminatas Edit-->
+  <div class="modal fade" id="modalWalkEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Editar</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body">
+                <form id="formWalk">
+                  <div class="col-12">
+                      <div class="row p-3">
+                        <div class="col-12 text-center">
+                          <img src="" class="img-fluid" style="height: 150px;" id="srcE" alt="">
+                        </div>
+                          <div class="col-12">
+                            <input type="hidden" name="key" id="key">
+                            <input type="hidden" name="fileName" id="fileName">
+                              <label for="basic-url">Imagen</label>
+                              <div class="input-group mb-3">
+                                  <input type="file" id="file-input-walkE" class="form-control" aria-describedby="basic-addon3">
+                              </div>
+                          </div>
+                          <div class="col-12">
+                            <div class="form-group green-border-focus">
+                                <label for="basic-url">Descripción</label>
+                                <textarea id="descripcionWalkE" name="descripcion" class="form-control" rows="3"></textarea>
+                            </div>
+                          </div>
+                      </div>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                  <div class="col-12">
+                      <button id="acceptImageWalkE" type="button" class="btn btn-primary btn-block">Aceptar</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+<!--AddUser-->
+  <div class="modal fade" id="modalAddUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Agregar Usuario</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <div class="modal-body">
+            <div class="col-12">
+                <div class="row p-3">
+                    <div class="col-12">
+                        <label for="basic-url">Correo</label>
+                        <div class="input-group mb-3">
+                            <input type="email" class="form-control" id="email">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label for="basic-url">Contraseña</label>
+                        <div class="input-group mb-3">
+                            <input type="password" class="form-control" id="password">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                      <label for="basic-url">Roles</label>
+                      <div class="input-group mb-3">
+                        <select class="form-control" name="rol" id="rol">
+                          <option value="0" selected>Selecciona un rol</option>
+                          <option value="1">Caminatas Caninas</option>
+                          <option value="2">Adopción</option>
+                          <option value="3">Experiencias vividas</option>
+                          <option value="4">Noticias y Avisos</option>
+                          <option value="5">Admin</option>
+                        </select>
+                      </div>
+                  </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col-12">
+                <button id="acceptAddUser" type="button" class="btn btn-primary btn-block">Registrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<!--Adopciones-->
+  <div class="modal fade" id="modalAdoption" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Agregar Post</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+          <div class="modal-body">
+              <div class="col-12">
+                  <div class="row p-3">
+                      <div class="col-6">
+                          <label for="basic-url">Nombre</label>
+                          <div class="input-group mb-3">
+                              <input type="text" class="form-control" id="nombre" aria-describedby="basic-addon3">
+                          </div>
+                      </div>
+                      <div class="col-6">
+                          <label for="basic-url">Tamaño</label>
+                          <div class="input-group mb-3">
+                              <input type="text" class="form-control" id="tamanio" aria-describedby="basic-addon3">
+                          </div>
+                      </div>
+                      <div class="col-6">
+                          <label for="basic-url">Genero</label>
+                          <div class="input-group mb-3">
+                              <input type="text" class="form-control" id="genero" aria-describedby="basic-addon3">
+                          </div>
+                      </div>
+                      <div class="col-6">
+                          <label for="basic-url">Edad</label>
+                          <div class="input-group mb-3">
+                              <input type="text" class="form-control" id="edad" aria-describedby="basic-addon3">
+                          </div>
+                      </div>
+                      <div class="col-6">
+                        <label for="basic-url">Vacunado</label>
+                        <div class="input-group mb-3">
+                          <select class="form-control" name="vacunado" id="vacunado">
+                            <option value="Si">Si</option>
+                            <option value="No">No</option>
+                          </select>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <label for="basic-url">Desparasitado</label>
+                        <div class="input-group mb-3" >
+                            <select class="form-control" name="desparasitado" id="desparasitado">
+                              <option value="Si">Si</option>
+                              <option value="No">No</option>
+                            </select>
+                        </div>
+                    </div>
+                      <div class="col-12">
+                          <label for="basic-url">Imagen</label>
+                          <div class="input-group mb-3">
+                              <input type="file" id="file-input-adoption" class="form-control" aria-describedby="basic-addon3">
+                          </div>
+                      </div>
+                      <div class="col-12">
+                          <div class="form-group green-border-focus">
+                              <label for="basic-url">Descripción</label>
+                              <textarea id="descripcionAdoption" class="form-control" id="exampleFormControlTextarea5" rows="3"></textarea>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div class="modal-footer">
+              <div class="col-12">
+                  <button id="acceptAdoption" type="button" class="btn btn-primary btn-block">Aceptar</button>
+              </div>
+          </div>
+      </div>
+  </div>
+  </div>
+<!--Adopciones Detalles-->
+  <div class="modal fade" id="modalAdoptionDetail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Detalles</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <div class="modal-body">
+            <div class="col-12">
+              <form id="formEditAdoption">
+                <div class="row p-3">
+                  <div class="col-sm-12 col-xs-12 col-md-12 col-lg-4">
+                    <div class="row">
+                      <img src="" class="img-fluid" id="dataImage" alt="">
+                      <div class="col-12" id="editFile"></div>
+                        <table class="table table-bordered">
+                          <tbody id="renderTabDetail">
+                            
+                          </tbody>
+                        </table>
+                      </div>
+                  </div>
+                  <div class="col-md-12 col-lg-8 col-sm-12 col-xs-12">
+                    <div class="row">
+                      <div class="col-12" id="renderTabDetailVideo"></div>
+                      <table class="table table-bordered">
+                        <thead>
+                          <tr><th class="text-white" style="background-color: #515151;">Descripción</th></tr>
+                        </thead>
+                        <tbody id="renderTabDetailDesc">
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+              </div>
+              </form>
+                <div id="btn-save"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<!--Adopciones Editar-->
+  <div class="modal fade" id="modalAdoptionUpdate" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Editar Post</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <div class="modal-body">
+            <div class="col-12">
+                <div class="row p-3">
+                    <div class="col-6">
+                        <label for="basic-url">Nombre</label>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="nombre" aria-describedby="basic-addon3">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <label for="basic-url">Tamaño</label>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="tamanio" aria-describedby="basic-addon3">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <label for="basic-url">Genero</label>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="genero" aria-describedby="basic-addon3">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <label for="basic-url">Edad</label>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="edad" aria-describedby="basic-addon3">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label for="basic-url">Imagen</label>
+                        <div class="input-group mb-3">
+                            <input type="file" id="file-input-adoption-edit" class="form-control" aria-describedby="basic-addon3">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group green-border-focus">
+                            <label for="basic-url">Descripción</label>
+                            <textarea id="descripcionOptionEdit" maxlength="140" class="form-control" id="exampleFormControlTextarea5" rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col-12">
+                <button id="acceptAdoptionEdit" type="button" class="btn btn-primary btn-block">Aceptar</button>
+            </div>
+        </div>
+    </div>
+  </div>
+  </div>
+<!--Noticias-->
+  <div class="modal fade" id="modalNews" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Agregar Post</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+          <div class="modal-body">
+              <div class="col-12">
+                  <div class="row p-3">
+                      <div class="col-12">
+                          <label for="basic-url">Imagen</label>
+                          <div class="input-group mb-3">
+                              <input type="file" id="file-input-news" class="form-control">
+                          </div>
+                      </div>
+                      <div class="col-12">
+                          <div class="form-group green-border-focus">
+                              <label for="basic-url">Descripción</label>
+                              <textarea id="descripcionNews" class="form-control" rows="3"></textarea>
+                          </div>
+                      </div>
+                      <div class="offset-3 col-6">
+                          <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="isPrincipal">
+                            <label class="custom-control-label" for="isPrincipal">¿Es noticia principal?</label>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div class="modal-footer">
+              <div class="col-12">
+                  <button id="acceptNews" type="button" class="btn btn-primary btn-block">Aceptar</button>
+              </div>
+          </div>
+      </div>
+    </div>
+  </div>
+<!--Noticias Edit-->
+<div class="modal fade" id="modalNewsEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Editar</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+        <div class="modal-body">
+            <div class="col-12">
+              <form id="formNews">
+                <div class="row p-3">
+                    <div class="col-12 text-center">
+                      <input type="hidden" name="key" id="keyNews">
+                      <input type="hidden" name="imageName" id="imageName">
+                      <img src="" id="srcEditWalk" style="height: 150px;" class="img-fluid" alt="">
+                    </div>
+                    <div class="col-12">
+                        <label for="basic-url">Imagen</label>
+                        <div class="input-group mb-3">
+                            <input type="file" id="file-input-newsE" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group green-border-focus">
+                            <label for="basic-url">Descripción</label>
+                            <textarea id="descripcionNewsE" name="descripcion" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="offset-3 col-6">
+                        <div class="custom-control custom-checkbox">
+                          <input type="checkbox" name="principal" class="custom-control-input" id="isPrincipalE">
+                          <label class="custom-control-label" for="isPrincipalE">¿Es noticia principal?</label>
+                        </div>
+                    </div>
+                </div>
+              </form>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col-12">
+                <button id="acceptNewsE" type="button" class="btn btn-primary btn-block">Aceptar</button>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+<!--Eperiencias vividas-->
+  <div class="modal fade" id="modalExperience" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Agregar Post</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <div class="modal-body">
+            <div class="col-12">
+                <div class="row p-3">
+                    <div class="col-12">
+                        <label for="basic-url">Imagen</label>
+                        <div class="input-group mb-3">
+                            <input type="file" id="file-input-experiences" class="form-control" aria-describedby="basic-addon3">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group green-border-focus">
+                            <label for="basic-url">Descripción</label>
+                            <textarea id="descripcionExperiences" class="form-control" id="exampleFormControlTextarea5" rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col-12">
+                <button id="acceptExperiences" type="button" class="btn btn-primary btn-block">Aceptar</button>
+            </div>
+        </div>
+    </div>
+  </div>
+  </div>
+
+<style>
+
+  .preloader {
+    width: 70px;
+    height: 70px;
+    border: 10px solid #eee;
+    border-top: 10px solid #666;
+    border-radius: 50%;
+    animation-name: girar;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    margin: auto;
+  }
+  @keyframes girar {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+</style>
+
+<!--About-->
+  <div class="modal fade bottom" id="modalAbout" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fluid" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title text-center" id="exampleModalLabel">Acerca de nosotros</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+        <div class="modal-body">
+          <div class="col-12">
+            <div class="row p-3">
+                <div class="col-4">
+                  <div class="col-12">
+                    <label for="basic-url">Imagen</label>
+                    <div class="input-group mb-3">
+                        <input type="hidden" id="keyAbout">
+                        <input type="hidden" id="imageNameAbout">
+                        <input type="file" id="file-input-about" class="form-control" aria-describedby="basic-addon3">
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-group green-border-focus">
+                        <label for="basic-url">Descripción</label>
+                        <textarea id="descripcionAbout" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="col-12">
+                  <button id="acceptAbout" type="button" class="btn btn-primary btn-block">Aceptar</button>
+                  <button id="acceptAboutE" type="button" class="btn btn-primary btn-block d-none">Guardar</button>
+                </div>
+                </div>
+                <div class="col-8">
+                  <table class="table table-bordered table-response">
+                    <thead>
+                      <tr>
+                        <th>Imagen</th>
+                        <th>Descripción</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="aboutRender">
+                      
+                    </tbody>
+                  </table>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!--Info Contacto-->
+<div class="modal fade bottom" id="modalInfoContact" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-fluid" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title text-center" id="exampleModalLabel">Información de contacto</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+      <div class="modal-body">
+        <div class="col-12">
+          <div class="row p-3">
+              <div class="col-4">
+                <form action="" id="formContact">
+                  <input type="hidden" id="keyContact" name="key">
+                  <div class="col-12">
+                      <div class="form-group green-border-focus">
+                          <label for="basic-url">Teléfono</label>
+                          <input id="phoneContact" name="phone" class="form-control"/>
+                      </div>
+                  </div>
+                  <div class="col-12">
+                    <div class="form-group green-border-focus">
+                        <label for="basic-url">Correo</label>
+                        <input id="emailContact" name="email" class="form-control"/>
+                    </div>
+                  </div>
+                </form>
+                <div class="col-12">
+                  <button id="acceptInfo" type="button" class="btn btn-primary btn-block">Aceptar</button>
+                  <button id="acceptInfoE" type="button" class="btn btn-primary btn-block d-none">Guardar</button>
+                </div>
+              </div>
+              <div class="col-8">
+                <table class="table table-bordered table-response">
+                  <thead>
+                    <tr>
+                      <th>Teléfono</th>
+                      <th>Correo</th>
+                    </tr>
+                  </thead>
+                  <tbody id="infoRender">
+                    
+                  </tbody>
+                </table>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--Loading Upload-->
+<div class="modal fade" id="modalUpload" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Subiendo información</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+        <div class="modal-body">
+            <div class="col-12 text-center">
+                <label>Subiendo información por favor espere</label>
+                <div class="row">
+                  <div class="offset-1 col-10">
+                    <div class="preloader"></div>
+                  </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+<!--Loading-->
+<div class="modal fade" id="modalLoading" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+        <div class="modal-body">
+            <div class="col-12 text-center">
+                <label>Cargando por favor espere</label>
+                <div class="row">
+                  <div class="offset-1 col-10">
+                    <div class="preloader"></div>
+                  </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+</html>

@@ -1,0 +1,175 @@
+.contenedor {
+  width: 90px;
+  height: 240px;
+  position: fixed;
+  right: 0px;
+  bottom: 0px;
+  z-index: 999;
+  cursor: pointer;
+}
+.botonF1 {
+  width: 60px;
+  height: 60px;
+  border-radius: 100%;
+  right: 0;
+  bottom: 0;
+  position: absolute;
+  margin: 16px;
+  border: none;
+  outline: none;
+  color: #fff;
+  background: #00bb2d;
+  font-size: 36px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  transition: 0.3s;
+  cursor: pointer;
+}
+.imgCard {
+  margin-top: 0;
+  margin-right: 0;
+}
+
+.container2 {
+  position: relative;
+  width: 50%;
+}
+
+.image2 {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0%;
+  right: 100%;
+  background-color: white;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  overflow: hidden;
+  width: 0;
+  height: 50%;
+  -webkit-transition: 0.5s ease;
+  -o-transition: 0.5s ease;
+  transition: 0.5s ease;
+}
+
+.container2:hover .overlay {
+  width: 100%;
+  left: 0;
+}
+
+.text2 {
+  color: white;
+  font-size: 20px;
+  position: absolute;
+  top: 20%;
+  left: 68%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+}
+.flip-corner {
+  height: 50px;
+  position: relative;
+  top: 86%;
+  left: 46%;
+  border-radius: 10%;
+}
+.cardBox:hover .flip-corner {
+  display: none;
+}
+
+.cardS {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 260px;
+  height: 250px;
+  background: #000;
+  border-radius: 7px;
+}
+.cardS .image {
+  width: 100%;
+  height: 100%;
+  border-radius: 7px;
+  overflow: hidden;
+}
+.cardS .image img {
+  width: 100%;
+  transition: 0.5s;
+}
+.cardS:hover .image img {
+  opacity: 0.5;
+  transform: translateX(30%); /*100%*/
+}
+.cardS .details {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 85%; /*100%*/
+  height: 100%;
+  background: #ffc107;
+  transition: 0.5s;
+  transform-origin: left;
+  transform: perspective(2000px) rotateY(-90deg);
+  border-radius: 7px;
+}
+.cardS:hover .details {
+  transform: perspective(2000px) rotateY(0deg);
+}
+.cardS .details .center {
+  padding: 20px;
+  text-align: center;
+  background: #fff;
+  position: absolute;
+  top: 50%;
+  height: 100%;
+  width: 100%;
+  transform: translateY(-50%);
+  border-radius: 7px;
+}
+.cardS .details .center h1 {
+  margin: 0;
+  padding: 0;
+  color: #ff3636;
+  line-height: 20px;
+  font-size: 20px;
+  text-transform: uppercase;
+}
+.cardS .details .center h1 span {
+  font-size: 14px;
+  color: #262626;
+}
+.cardS .details .center p {
+  margin: 10px 0;
+  padding: 0;
+  color: #262626;
+}
+.cardS .details .center ul {
+  margin: 10px auto 0;
+  padding: 0;
+  display: table;
+}
+.cardS .details .center ul li {
+  list-style: none;
+  margin: 0 5px;
+  float: left;
+}
+.cardS .details .center ul li a {
+  display: block;
+  background: #262626;
+  color: #fff;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  transform: 0.5s;
+}
+.cardS .details .center ul li a:hover {
+  background: #ff3636;
+}

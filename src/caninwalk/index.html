@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" style="scroll-behavior: smooth;">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Caminatas caninas</title>
+        <link rel="shortcut icon" href="../../img/2-1.png" >
+        <link rel="stylesheet" href="../../css/bootstrap.min.css">
+        <link rel="stylesheet" href="../../css/mdb.min.css">
+        <link rel="stylesheet" href="../../css/normalize.css">
+        <link rel="stylesheet" href="../../css/style.css">
+        <link rel="stylesheet" href="../../css/lightbox.css">
+        <link rel="stylesheet" href="../../css/walk.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+        <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+        <script src="../../js/jquery-3.3.1.min.js" charset="utf-8"></script>
+        <script src="../../js/popper.min.js" charset="utf-8"></script>
+        <script src="../../js/mdb.min.js" charset="utf-8"></script>
+        <script src="../../js/bootstrap.min.js" charset="utf-8"></script>
+        <script src="../../js/lightbox.js" charset="utf-8"></script>
+        <script src="../../js/smooth-scroll.min.js"></script>
+        <script src="../../js/fontawesome-all.js" charset="utf-8"></script>
+        <script src="../../js/parallax.js" charset="utf-8"></script>
+        <script src="../../js/scrollreveal.js"></script>
+        <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+        <script src="../adoptions/init.js"></script>
+
+        <script>
+            
+            $(document).ready(function(){
+
+              $(".seeMore").hide()
+              $(".btn-see-less").hide()
+
+                $(".ing").hide();
+
+                $('.botonF1').click(function(){
+                  $('.btn').addClass('animacionVer');
+                })
+                $('.contenedor').mouseleave(function(){
+                  $('.btn').removeClass('animacionVer');
+                })
+                var id = 0
+                $(".btn-see").click(function(){
+                  id = $(".text-news").data("id");
+                  $(".btn-see").hide();
+                  $(".btn-see-less").show();
+                  $(".seeMore").show();
+                })
+                $(".btn-see-less").click(function(){
+                  $(".btn-see-less").hide();
+                  $(".btn-see").show();
+                  $(".seeMore").hide();
+                })
+
+                $(".toAdopt").click(function(){
+                  window.location.href = "#adoption"
+                })
+
+                $(".mailpetadop").click(function(){
+                  window.open("https://mail.google.com/mail/?compose=1&view=cm&fs=1&to=info@ayudog.com&su=subject&body=hola buen dia",'_blank');
+                })
+
+                $(".mailtoInfo").click(function(){
+                  window.open("https://mail.google.com/mail/?compose=1&view=cm&fs=1&to=info@ayudog.com&su=subject&body=hola buen dia",'_blank');
+                })
+
+                $("#btn-show-adoption").click(function(){
+                  $(".adopt-hiden").removeClass("d-none");
+                  $("#btn-show-adoption").addClass("d-none");
+                  $("#btn-hide-adoption").removeClass("d-none");
+                })
+
+                $("#btn-hide-adoption").click(function(){
+                  $(".adopt-hiden").addClass("d-none");
+                  $("#btn-hide-adoption").addClass("d-none");
+                  $("#btn-show-adoption").removeClass("d-none");
+                })
+            })
+
+        </script>
+    </head>
+    <body>
+      <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-storage.js"> </script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-database.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-firestore.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-messaging.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-functions.js"></script>
+        <script src="../../js/intern/data.js"></script>
+        <script>
+          
+          $(document).ready(function(){
+            readWalkData()
+            readAdoptionData()
+            readNewsData()
+
+            
+            $("#newsRender").on("click", ".btn-see", function(){
+              var id = $(this).data("id")
+              $(this).addClass("d-none")
+              $(".seeMore"+id).removeClass("d-none")
+            })
+            $("#newsRender").on("click", ".btn-see-less", function(){
+              //$(this).addClass("d-none")
+              var id = $(this).data("id")
+              $(".seeMore"+id).addClass("d-none")
+              $(".btn-see").removeClass("d-none")
+
+            })
+            $("#adoptionRender").on("click",".seeDetail", async function(){
+              $("#genero").html($(this).data("genero"))
+              $("#nombre").html($(this).data("nombre"))
+              $("#descripcion").html($(this).data("descripcion"))
+              $("#desparasitado").html("Desparasitado: "+$(this).data("desparasitado"))
+              $("#edad").html($(this).data("edad"))
+              $("#tamanio").html($(this).data("tamanio"))
+              $("#vacunado").html("Vacunado: "+$(this).data("vacunado"))
+              $("#imagen").attr("src", $(this).data("image"))
+            
+              $("#infoModal").modal("show")
+            })
+          })
+        </script>
+
+      <nav class="navbar navbar-expand-lg navbar-dark bg-hue fixed-top">
+          <div class="container">
+            <a class="navbar-brand px-lg-4 mr-0 d-lg-none" href="#home">
+              <img src="../../img/caminata_white.png" class="animate__animated animate__bounce" style="height: 100px;" alt="">
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#basicExampleNav" aria-controls="basicExampleNav"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-center font-weight-bold" id="basicExampleNav">
+              <a class="navbar-brand px-lg-4 mr-0 d-none d-lg-block" data-scroll href="#home">
+              <img src="../../img/caminata_white.png" class="animate__animated animate__bounce" style="height: 100px;" alt="">
+              </a>
+              <ul class="navbar-nav">
+                <li class="nav-item font3">
+                  <div class="d-none d-lg-block">
+                    <a class="nav-link" class="btn"  href="#walk">
+                    <div class="esp animate__animated animate__bounce">
+                      Caminatas Caninas
+                    </div>
+                    <div class="ing animate__animated animate__bounce">
+                      Dog Walks
+                    </div>
+                  </a>
+                  </div>
+                  <div class="d-block d-md-block d-lg-none">
+                    <a class="nav-link" class="btn" data-toggle="modal" href="#walk">
+                    <div class="esp animate__animated animate__bounce">
+                      Caminatas Caninas
+                    </div>
+                    <div class="ing animate__animated animate__bounce">
+                      Dog Walks
+                    </div>
+                    </a>
+                  </div>
+                </li>
+                <li class="nav-item font3">
+                  <a class="nav-link" data-scroll href="#adoption">
+                    <div class="esp animate__animated animate__bounce">
+                      Adopciones
+                    </div>
+                    <div class="ing animate__animated animate__bounce">
+                      Adoptions
+                    </div>
+                  </a>
+                </li>
+                <li class="nav-item font3">
+                  <a class="nav-link" data-scroll href="#news">
+                    <div class="esp animate__animated animate__bounce">
+                      Noticias
+                    </div>
+                    <div class="ing animate__animated animate__bounce">
+                      News
+                    </div>
+                  </a>
+                </li>
+              <li class="nav-item font3">
+                <a class="nav-link" data-scroll href="#contact">
+                  <div class="esp animate__animated animate__bounce">
+                    Contactanos
+                  </div>
+                  <div class="ing">
+                    <i class="fa fa-envelope" aria-hidden="true"></i> Contact
+                  </div>
+                </a>
+              </li>
+              <li class="nav-item font3">
+                <a class="nav-link" data-scroll href="about.html">
+                  <div class="esp animate__animated animate__bounce">
+                    Acerca de nosotros
+                  </div>
+                  <div class="ing">
+                    <i class="fa fa-envelope" aria-hidden="true"></i> About
+                  </div>
+                </a>
+              </li>
+              </ul>
+            </div>
+      
+              
+      </nav>
+
+      <div id="home" class="parallax-window full-height" data-position-y="center" data-parallax="scroll" data-image-src="../../img/perro_walk_2.jpg" style="background:rgba(21,21,21,0.2)"></div>
+
+      <div class="container">
+          <div class="contenedor">
+            <a class="botonF1 mailtoInfo">
+              <i class="fas fa-envelope" style="color: white;"></i>
+            </a>
+          </div>
+          <div class="container" id="walk">
+            <div class="color-txt display-4 font-weight-light mt-5 p-4 text-center" style="border-bottom: solid 3px #ff5757;">
+                <div class="row text-center">
+                    <div class="col-12">
+                        Caminatas Caninas
+                    </div>
+                </div>
+            </div>
+            <div class="row" id="walkRender"></div>
+          </div>
+
+          <div class="container" id="news">
+            <div class="">
+              <div class="color-txt display-4 font-weight-light mt-5 p-4 text-center" style="border-bottom: solid 3px #ff5757;">
+                    Noticias y Avisos
+              </div>
+              <div class="row" id="newsRender"></div>
+            </div>
+          </div>
+
+          <div class="container" id="adoption" >
+            <div class="color-txt display-4 font-weight-light mt-5 p-4 text-center" style="border-bottom: solid 3px #ff5757;">
+              Adopción
+            </div>
+            <div class="row" id="adoptionRender"></div>
+          </div>
+
+      </div>
+
+      
+    </body>
+    <footer class="page-footer font-small blue bg-hue" style="margin-top: 20px;" id="contact">
+
+        <div class="footer-copyright text-center py-5">
+    
+            <div class="col-md-12 col-12 "list-inline>
+              <div class="row">
+                <div class="col-12">
+                  <div class="esp">
+                    <h5 class="font text-white">Proyecto desarrollado por:
+                    </h5>
+                  </div>
+                  <div class="ing">
+                    <h5 class="font text-white">Project developed by:
+                    </h5>
+                  </div>
+                  <div class=" d-lg-none d-print-block">
+                    <img src="img/logo-direc.png" width="40%" alt="">
+                  </div>
+                  <div class=" d-none d-lg-block d-print-block">
+                    <img src="img/logo-direc.png" width="10%" alt="">
+                  </div>
+                </div>
+              </div>
+              <a href="https://www.facebook.com/Ayudogmx-998884180275726" target="_blank" class="list-inline-item"><h4 class="font"><i class="fab fa-facebook-square" id="fac"></i> /ayudogmx</h4></a>
+              <a class="list-inline-item"><h2 class="font3">|</h2></a>
+              <a href="https://www.instagram.com/ayudogmx/" target="_blank" class="list-inline-item"><h4 class="font"><i class="fab fa-instagram" id="inst"></i> ayudogmx</h4></a></p>
+              <a class="font text-white" style="font-size:1.5em">info@ayudog.com</a>
+    
+            </div>
+    
+          </div>
+    </footer>
+
+    <!-- Central Modal Small -->
+    <div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+    <!-- Change class .modal-sm to change the size of the modal -->
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-3 col-sm-12 col-xs-12">
+              <img id="imagen" src="../../img/dog.png" style="border-radius: 5px;width: 100%;"  alt="">
+            </div>
+            <div class="col-md-8 col-sm-12 col-xs-12">
+              <div class="row" style="font-weight: bold;font-size: 25px;">
+                  <p id="nombre" style="margin: 16px;"></p>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <span class="badge badge-pill badge-primary"><p style="margin-bottom: 0px;" id="genero"></p> </span>
+                  <span class="badge badge-pill badge-warning"><p style="margin-bottom: 0px;" id="edad"></p> </span>
+                  <span class="badge badge-pill badge-success"><p style="margin-bottom: 0px;" id="desparasitado"></p> </span>
+                  <span class="badge badge-pill badge-info"><p style="margin-bottom: 0px;" id="vacunado"></p> </span>
+                  <hr style="background: #ff5757;">
+                  <div class="row text-justify" style="margin: 16px;"><p id="descripcion"></p></div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    <!-- Central Modal Small -->
+</html>

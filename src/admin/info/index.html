@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Admin</title>
+        <link rel="shortcut icon" href="../../../img/favicon.png" >
+        <link rel="stylesheet" href="../../../css/bootstrap.min.css">
+        <link rel="stylesheet" href="../../../css/mdb.min.css">
+        <link rel="stylesheet" href="../../../css/normalize.css">
+        <link rel="stylesheet" href="../../../css/lightbox.css">
+        <link rel="stylesheet" href="../../../css/styleAdmin.css">
+        <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+        <script src="../../../js/jquery-3.3.1.min.js" charset="utf-8"></script>
+        <script src="../../../js/popper.min.js" charset="utf-8"></script>
+        <script src="../../../js/mdb.min.js" charset="utf-8"></script>
+        <script src="../../../js/bootstrap.min.js" charset="utf-8"></script>
+        <script src="../../../js/fontawesome-all.js" charset="utf-8"></script>
+        <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+        <script src="../../adoptions/app.js"></script>
+        <script src="../../adoptions/init.js"></script>
+        <script src="../../adoptions/FormSerialize.js"></script>
+        <script src="../../../js/intern/data.js"></script>
+        <script>
+            $(document).ready(function(){
+                authentication("../../session")
+            })
+        </script>
+    </head>
+    <body>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-storage.js"> </script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-database.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-firestore.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-messaging.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-functions.js"></script>
+        <script src="../../../js/main.js"></script>
+
+        <script>
+            firebase.initializeApp(getInit());
+            $(document).ready(function(){
+                readContactData()
+                
+                $("#add").click(function(){
+                    $("#modalInfoContact").modal("show")
+                })
+                $("#acceptInfo").click(function(){
+                    var form = getFormData($("#formContact"))
+                    console.log(form.email);
+                    console.log(form.phone);
+                    writeContact(form.phone, form.email)
+                })
+
+                $("#edit").click(function(){
+                    var phone = $("#phone").val()
+                    var email = $("#email").val()
+                    var key = $("#key").val()
+                    $("#phoneContact").val(phone)
+                    $("#emailContact").val(email)
+                    $("#keyContact").val(key)
+                    $("#modalInfoContact").modal("show")
+                })
+
+                $("#acceptInfoE").click(function(){
+                    var form = getFormData($("#formContact"))
+                    $("#modalLoading").modal("show");
+                    UpdateContact(form.phone, form.email, form.key)
+                })
+
+                $("#infoRender").on("click", ".btn-delete-contact", function(){
+                    var key = $(this).data("id")
+                    deleteContact(key)
+                })
+                //renderEmail
+            })
+            function readContactData() {
+                var cad = '';
+                firebase.database().ref('/contact/').once('value').then(async function(snapshot) {
+                    for(var key in snapshot.val()){
+                        var item = snapshot.val()[key];
+                        if (item!=null) {
+                            $("#add").hide()
+                            $("#renderPhone").html(item.phone)
+                            $("#renderEmail").html(item.email)
+                            $("#acceptInfo").hide()
+                            $("#phone").val(item.phone)
+                            $("#email").val(item.email)
+                            $("#key").val(key)
+                        }else{
+                            $("#edit").hide()
+                            $("#acceptInfoE").hide()
+                        }
+                    }
+                });
+            }
+            function UpdateContact(phone, email, key) {
+                var storageUrl = 'contact/';
+                firebase.database().ref(storageUrl+key).update({
+                    phone: phone,
+                    email: email
+                }).then(() => {
+                  console.log("then");
+                  readContactData() 
+                  $("#modalLoading").modal("hide");
+                  $("#modalLoading").modal("hide");
+                    //readAdoptionData();
+                }).catch(function(e){
+                    alert("Ha ocurrido un error inesperado intente más tarde");
+                    $("#modalLoading").modal("hide");
+                    console.log(e);
+                });
+        
+            }
+
+        </script>
+
+        <div class="wrapper d-flex align-items-stretch">
+            <nav id="sidebar">
+                <div class="p-4 pt-5">
+                <a href="#" class="img logo rounded-circle mb-5" style="background-image: url(images/logo.jpg);"></a>
+                <ul class="list-unstyled components mb-5">
+                    <div class="list-group" id="list-tab" role="tablist">
+                        <li>
+                            <a href="../">Caminatas caninas</a>
+                        </li>
+                        <li>
+                            <a href="../adoption">Adopciones</a>
+                        </li>
+                        <li>
+                            <a href="../news">Noticias y avisos</a>
+                        </li>
+                        <li>
+                            <a href="../users">Usuarios</a>
+                        </li>
+                        <li class="active">
+                            <a href="#">Información contacto</a>
+                        </li>
+                        <li>
+                            <a href="../about">Acerca de nosotros</a>
+                        </li>
+                        <li>
+                            <a href="../ayudog">Ayudog</a>
+                        </li>
+                        <li>
+                            <a href="../../adoptions/adoption.html">Admin visual</a>
+                        </li>
+                    </div>
+                </ul>
+
+            <div class="footer">
+                
+            </div>
+
+        </div>
+            </nav>
+            <div id="content" class="p-4 p-md-5">
+                <a href="#" id="add" class="float">
+                    <i class="fa fa-plus my-float"></i>
+                </a>
+                <a href="#" id="edit" class="float-edit">
+                    <i class="fa fa-edit my-float"></i>
+                </a>
+                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                    <div class="container-fluid">
+
+                        <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                        <i class="fa fa-bars"></i>
+                        <span class="sr-only">Toggle Menu</span>
+                        </button>
+                        <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                            <i class="fa fa-bars"></i>
+                        </button>
+
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="nav navbar-nav ml-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="../">Caminatas caninas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="../adoption">Adopciones</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="../news">Noticias y avisos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="../users">Usuarios</a>
+                            </li>
+                            <li class="nav-item active">
+                                <a class="nav-link" href="#">Información contacto</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="../about">Acerca de nosotros</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="../ayudog/">Ayudog</a>
+                            </li>
+                        </ul>
+                        </div>
+                    </div>
+                </nav>
+                <style>
+                    .table100-head {
+                        font-family: OpenSans-Regular;
+                        font-size: 18px;
+                        color: #fff;
+                        line-height: 1.2;
+                        font-weight: unset;
+                    }
+                    .float-edit{
+                        position:fixed;
+                        width:55px;
+                        height:55px;
+                        bottom:40px;
+                        right:5px;
+                        background-color:#3e93f5;
+                        color:#FFF;
+                        border-radius:50px;
+                        text-align:center;
+                        box-shadow: 2px 2px 3px #999;
+                    }
+                    .float{
+                        position:fixed;
+                        width:55px;
+                        height:55px;
+                        bottom:40px;
+                        right:5px;
+                        background-color:#FF3547;
+                        color:#FFF;
+                        border-radius:50px;
+                        text-align:center;
+                        box-shadow: 2px 2px 3px #999;
+                    }
+
+                    .my-float{
+                        margin-top:22px;
+                    }
+                </style>
+
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="list-caminatas" role="tabpanel" aria-labelledby="list-caminatas-list">
+                        <div id="caminatas">
+                            <h2 class="mb-4">Información de contacto</h2>
+                            <div class="container-fluid inner">
+                                <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
+                                    <input type="hidden" id="key">
+                                    <input type="hidden" id="phone">
+                                    <input type="hidden" id="email">
+                                    <div class="card-header">Contacto </div>
+                                    <div class="card-body bg-light">
+                                      <h5 class="card-title" id="renderEmail"></h5>
+                                      <p class="card-text" id="renderPhone"></p>
+                                    </div>
+                                  </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+<!--Info Contacto-->
+<div class="modal fade bottom" id="modalInfoContact" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title text-center" id="exampleModalLabel">Información de contacto</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+        <div class="modal-body">
+          <div class="col-12">
+            <div class="row p-3">
+                <div class="col-12">
+                  <form action="" id="formContact">
+                    <input type="hidden" id="keyContact" name="key">
+                    <div class="col-12">
+                        <div class="form-group green-border-focus">
+                            <label for="basic-url">Teléfono</label>
+                            <input id="phoneContact" name="phone" class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                      <div class="form-group green-border-focus">
+                          <label for="basic-url">Correo</label>
+                          <input id="emailContact" name="email" class="form-control"/>
+                      </div>
+                    </div>
+                  </form>
+                  <div class="col-12">
+                    <button id="acceptInfo" type="button" class="btn btn-primary">Aceptar</button>
+                    <button id="acceptInfoE" type="button" class="btn btn-primary">Guardar</button>
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    </body>
+</html>

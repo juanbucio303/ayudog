@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AYUDOG</title>
+    <link rel="shortcut icon" href="../../img/favicon.png" >
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../css/mdb.min.css">
+    <link rel="stylesheet" href="../../css/normalize.css">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/lightbox.css">
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <script src="../../js/jquery-3.3.1.min.js" charset="utf-8"></script>
+    <script src="../../js/popper.min.js" charset="utf-8"></script>
+    <script src="../../js/mdb.min.js" charset="utf-8"></script>
+    <script src="../../js/bootstrap.min.js" charset="utf-8"></script>
+    <script src="../../js/lightbox.js" charset="utf-8"></script>
+    <script src="../../js/smooth-scroll.min.js"></script>
+    <script src="../../js/fontawesome-all.js" charset="utf-8"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <script type="text/javascript">
+    
+
+      $(document).ready(function(){
+        $("#sign").click(function(){
+            getData();
+        });
+        $("#em").on('keyup', function (e) {
+            var keycode = e.keyCode || e.which;
+            if (keycode == 13) {
+                getData();
+            }
+        });
+        $("#psw").on('keyup', function (e) {
+            var keycode = e.keyCode || e.which;
+            if (keycode == 13) {
+                getData();
+            }
+        });
+        
+      });
+      function getData(){
+        var em = $("#em").val()
+        var pws = $("#psw").val()
+        signIn(em, pws);
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container">
+        <div class="row" style="padding-top: 10%;">
+            <div class="offset-1 col-9">
+                <img src="../../img/favicon.png" style="height: auto;width: 30%; position: relative; margin: auto;margin-left: 40% ;" alt="" srcset="">
+            </div> 
+            <div class="col-md-6 col-sm-10 col-xs-10 offset-sm-1 offset-xs-1 offset-md-3">
+                <div class="card">
+                    <div class="row p-3">
+                        <div class="offset-1 col-10">
+                            <label>Correo</label>
+                            <input type="email" class="form-control" placeholder="Correo" id="em" required>
+                            <label>Contraseña</label>
+                            <input type="password" class="form-control" placeholder="Contraseña" id="psw" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-10 p-3" style="margin: auto;">
+                            <a class="btn btn-info btn-block" id="sign">Iniciar Sesion</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modalError" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        Usuario o contraseña incorrecto
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+    <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-app.js"></script>
+
+  <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-firestore.js"></script>
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyA5VKKM9a6EBaXLGvLRyjCLS5-KA3c4r4w",
+            authDomain: "notificationtest-6d60f.firebaseapp.com",
+            databaseURL: "https://notificationtest-6d60f.firebaseio.com",
+            projectId: "notificationtest-6d60f",
+            storageBucket: "notificationtest-6d60f.appspot.com",
+            messagingSenderId: "577427666180",
+            appId: "1:577427666180:web:e0a7a52517085658eccc51",
+            measurementId: "G-8E25M7K4V5"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        function signIn(email, pass){
+            firebase.auth().signInWithEmailAndPassword(email, pass)
+            .then(function(res){
+                location.href = "../admin"
+                sessionStorage.access = "Hola desde el sessionStorange"
+            })
+            .catch(function(error) {
+        // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            console.log("Error: "+error);
+            $("#modalError").modal("show")
+        // ...
+        });
+        }
+        
+    </script>
+  </body>
+
+</html>
