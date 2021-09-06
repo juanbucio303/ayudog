@@ -2,13 +2,16 @@ firebase.initializeApp(getInit());
 var userAgent = navigator.userAgent || navigator.vendor || window.opera;
           
           function readHomeData() {
-            
-            var cad = '<div class="carousel-item active"><img class="d-block w-100" style="border-radius: 12px; margin-bottom: 30px;" src="img/collage/collage2.jpg" alt="Second slide"></div>';
+            var ind = 0;
             firebase.database().ref('/home/').once('value').then(async function(snapshot) {
                 for(var key in snapshot.val()){
                     var item = snapshot.val()[key];
-                    console.log(item);
-                    cad += '<div class="carousel-item"><img class="d-block w-100" style="border-radius: 12px; " src="'+item.img64+'" alt="First slide"></div>'   
+                    if(ind == 0){
+                      cad += '<div class="carousel-item active"><img class="d-block w-100" style="border-radius: 12px; margin-bottom: 30px;" src="'+item.img64+'" alt="First slide"></div>';
+                    }else {
+                      cad += '<div class="carousel-item"><img class="d-block w-100" style="border-radius: 12px; margin-bottom: 30px;" src="'+item.img64+'" alt="First slide"></div>';
+                    }
+                    ind++;  
                 }
                 $("#carruselId").html(cad);
             });
