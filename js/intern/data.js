@@ -9,9 +9,9 @@ var userAgent = navigator.userAgent || navigator.vendor || window.opera;
                 for(var key in snapshot.val()){
                     var item = snapshot.val()[key];
                     if(ind == 0){
-                      cad += '<div class="carousel-item active"><img class="d-block w-100" style="border-radius: 12px; margin-bottom: 30px;" src="'+item.img64+'" alt="First slide"></div>';
+                      cad += '<div class="carousel-item active"><img class="d-block" style="width: 85%; border-radius: 12px; margin-bottom: 30px;" src="'+item.img64+'" alt="First slide"></div>';
                     }else {
-                      cad += '<div class="carousel-item"><img class="d-block w-100" style="border-radius: 12px; margin-bottom: 30px;" src="'+item.img64+'" alt="First slide"></div>';
+                      cad += '<div class="carousel-item"><img class="d-block" style="width: 85%; border-radius: 12px; margin-bottom: 30px;" src="'+item.img64+'" alt="First slide"></div>';
                     }
                     ind++;  
                 }
