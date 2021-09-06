@@ -2,7 +2,9 @@ firebase.initializeApp(getInit());
 var userAgent = navigator.userAgent || navigator.vendor || window.opera;
           
           function readHomeData() {
+
             var ind = 0;
+            var cad = '';
             firebase.database().ref('/home/').once('value').then(async function(snapshot) {
                 for(var key in snapshot.val()){
                     var item = snapshot.val()[key];
